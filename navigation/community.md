@@ -2,6 +2,7 @@
 layout: page
 title: Community Hub
 permalink: /community
+hide_title: true
 ---
 
 <div class="ocs__container ocs__community-hub">

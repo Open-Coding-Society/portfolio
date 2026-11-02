@@ -144,10 +144,10 @@ let currentCategory = 'all';
 
 function filterPrograms() {
   const query = document.getElementById('mgbSearchInput').value.toLowerCase();
-  const cards = document.querySelectorAll('.mgb-card');
+  const cards = document.querySelectorAll('#mgbGrid [data-category]');
 
   cards.forEach(card => {
-    const title = card.getAttribute('data-title').toLowerCase();
+    const title = card.dataset.title.toLowerCase();
     const category = card.getAttribute('data-category');
     card.hidden = !(title.includes(query) && (currentCategory === 'all' || category === currentCategory));
   });

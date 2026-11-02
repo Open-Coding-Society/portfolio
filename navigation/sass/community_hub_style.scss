@@ -1,0 +1,287 @@
+@import "materials/main.scss";
+
+$ocs-accent: #6C5CE7;
+$ocs-accent-hover: #5A4AD1;
+
+// Component Variables
+$ocs-accent: #6C5CE7;
+$ocs-accent-hover: #5A4AD1;
+$ocs-bg: rgba(255, 255, 255, 0.04);
+$ocs-border: rgba(255, 255, 255, 0.1);
+$ocs-text: #E2E8F0;
+$ocs-muted: #94A3B8;
+$ocs-badge-bg: rgba(108, 92, 231, 0.18);
+$ocs-badge-text: #A29BFE;
+
+// Reusable Panel Mixin
+@mixin ocs-panel {
+  background: $ocs-bg;
+  border: 1px solid $ocs-border;
+  backdrop-filter: blur(10px);
+}
+
+.mgb-community-hub {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  color: $ocs-text;
+  overflow: hidden;
+
+  // Background Ambient Orbs
+  .mgb-ambient-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+
+    .mgb-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+
+      &--1 {
+        width: 350px;
+        height: 350px;
+        background: $ocs-accent;
+        top: -50px;
+        left: -50px;
+      }
+
+      &--2 {
+        width: 400px;
+        height: 400px;
+        background: #00CEC9;
+        bottom: 10%;
+        right: -100px;
+      }
+    }
+  }
+
+  // Hero Section
+  .mgb-hub-hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto 3.5rem;
+
+    .mgb-hub-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 1rem;
+      border-radius: 30px;
+      background: $ocs-badge-bg;
+      color: $ocs-badge-text;
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 1.2rem;
+
+      .mgb-pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: $ocs-badge-text;
+        box-shadow: 0 0 8px $ocs-badge-text;
+      }
+    }
+
+    .mgb-hub-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      color: $ocs-text;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+    }
+
+    .mgb-hub-subtitle {
+      font-size: 1.15rem;
+      color: $ocs-muted;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .mgb-hero-stats {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      padding: 1.2rem 2rem;
+      border-radius: 20px;
+      @include ocs-panel;
+
+      .mgb-stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        .mgb-stat-number {
+          font-size: 1.4rem;
+          font-weight: 800;
+          color: $ocs-accent;
+        }
+
+        .mgb-stat-label {
+          font-size: 0.8rem;
+          color: $ocs-muted;
+          font-weight: 600;
+        }
+      }
+
+      .mgb-stat-divider {
+        width: 1px;
+        height: 30px;
+        background: $ocs-border;
+
+        @media (max-width: 600px) {
+          display: none;
+        }
+      }
+    }
+  }
+
+  // Cards Grid
+  .mgb-hub-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+
+    .mgb-hub-card {
+      @include ocs-panel;
+      border-radius: 20px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+
+      &:hover {
+        transform: translateY(-6px);
+        border-color: $ocs-accent;
+        box-shadow: 0 12px 30px rgba($ocs-accent, 0.25);
+
+        .mgb-card-glow {
+          opacity: 0.12;
+        }
+
+        .ocs-btn-arrow {
+          transform: translateX(4px);
+        }
+      }
+
+      .mgb-card-glow {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, $ocs-accent 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      .mgb-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+
+        .mgb-card-icon {
+          font-size: 2rem;
+        }
+
+        .mgb-card-tag {
+          font-size: 0.75rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          padding: 0.25rem 0.7rem;
+          border-radius: 8px;
+          background: $ocs-badge-bg;
+          color: $ocs-badge-text;
+        }
+      }
+
+      .mgb-card-body {
+        flex-grow: 1;
+
+        .mgb-card-title {
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: $ocs-text;
+          margin-bottom: 0.8rem;
+        }
+
+        .mgb-card-desc {
+          font-size: 0.95rem;
+          color: $ocs-muted;
+          line-height: 1.55;
+          margin-bottom: 1.5rem;
+        }
+
+        .mgb-card-buttons {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-bottom: 1.8rem;
+
+          .mgb-pill-btn {
+            font-size: 0.82rem;
+            color: $ocs-text;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 0.4rem 0.8rem;
+            border-radius: 12px;
+            display: inline-block;
+            font-weight: 500;
+          }
+        }
+      }
+
+      .mgb-card-footer {
+        .ocs-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          width: 100%;
+          padding: 0.85rem;
+          border-radius: 12px;
+          font-weight: 600;
+          font-size: 0.95rem;
+          text-decoration: none;
+          transition: all 0.2s ease;
+          cursor: pointer;
+
+          &--primary {
+            background: linear-gradient(135deg, $ocs-accent, $ocs-accent-hover);
+            color: #FFF;
+            border: none;
+
+            &:hover {
+              opacity: 0.92;
+              color: #FFF;
+              text-decoration: none;
+            }
+          }
+
+          .ocs-btn-arrow {
+            transition: transform 0.2s ease;
+          }
+        }
+      }
+    }
+  }
+}
+
+@import "community-hub"; 

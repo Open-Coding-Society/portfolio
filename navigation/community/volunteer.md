@@ -2,6 +2,7 @@
 layout: page
 title: Volunteer
 permalink: /community/volunteer/
+hide_title: true
 ---
 
 <div class="ocs__container ocs__community-volunteer">
