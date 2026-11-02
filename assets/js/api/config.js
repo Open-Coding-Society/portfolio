@@ -15,6 +15,8 @@ if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {
 
 }
 
+export const volunteerAPI = `${pythonURI}/api/volunteers`;
+
 export var javaURI;
 // 127.0.0.1:8585 does not work for some machines
 if (location.hostname === "localhost" || location.hostname === "127.0.0.1") {

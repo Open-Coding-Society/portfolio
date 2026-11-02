@@ -77,6 +77,18 @@
   font-size: 0.9rem;
 }
 
+.ocs__volunteer-status[data-state="loading"] {
+  color: var(--pref-accent-color);
+}
+
+.ocs__volunteer-status[data-state="success"] {
+  color: #15803d;
+}
+
+.ocs__volunteer-status[data-state="error"] {
+  color: #b42318;
+}
+
 .ocs__volunteer-form button:disabled {
   cursor: not-allowed;
   opacity: 0.6;

@@ -98,18 +98,18 @@ hide_title: true
 
   <section class="ocs__card ocs__volunteer-signup" aria-labelledby="volunteer-signup-title">
     <h2 id="volunteer-signup-title">Interested in volunteering?</h2>
-    <p class="ocs__text">Fill out this form preview to explore the sign-up experience. It does not send or save your information.</p>
+    <p class="ocs__text">Tell us a little about yourself and the role you are interested in. Submitting this application sends your information to My Good Brain for follow-up.</p>
 
-    <form id="ocs-volunteer-signup" class="ocs__volunteer-form">
+    <form id="ocs-volunteer-signup" class="ocs__volunteer-form" aria-busy="false">
       <div class="ocs__volunteer-form-grid">
         <div class="ocs__volunteer-field">
           <label for="volunteer-name">Name <span aria-hidden="true">*</span></label>
-          <input id="volunteer-name" name="name" type="text" autocomplete="name" required>
+          <input id="volunteer-name" name="name" type="text" autocomplete="name" maxlength="255" required>
         </div>
 
         <div class="ocs__volunteer-field">
           <label for="volunteer-email">Email <span aria-hidden="true">*</span></label>
-          <input id="volunteer-email" name="email" type="email" autocomplete="email" required>
+          <input id="volunteer-email" name="email" type="email" autocomplete="email" maxlength="320" required>
         </div>
 
         <div class="ocs__volunteer-field ocs__volunteer-field--wide">
@@ -127,17 +127,17 @@ hide_title: true
 
         <div class="ocs__volunteer-field ocs__volunteer-field--wide">
           <label for="volunteer-note">What would you like us to know? <span class="ocs__volunteer-optional">(optional)</span></label>
-          <textarea id="volunteer-note" name="message" rows="4" maxlength="500"></textarea>
+          <textarea id="volunteer-note" name="message" rows="4" maxlength="2000"></textarea>
         </div>
       </div>
 
-      <button class="ocs__btn accent fill" id="volunteer-preview-button" type="button" disabled>Preview sign-up</button>
-      <p class="ocs__volunteer-status" id="volunteer-preview-status" role="status" aria-live="polite">
-        Preview only — your information will not be sent or saved.
+      <button class="ocs__btn accent fill" id="volunteer-submit-button" type="submit" disabled>Submit application</button>
+      <p class="ocs__volunteer-status" id="volunteer-submit-status" role="status" aria-live="polite">
+        Your application will be sent securely to the volunteer team.
       </p>
-      <noscript><p>JavaScript is required to use this form preview. Your information is not submitted.</p></noscript>
+      <noscript><p>JavaScript is required to submit this application.</p></noscript>
     </form>
   </section>
 </div>
 
-<script src="{{ site.baseurl }}/assets/js/volunteer-signup.js" defer></script>
+<script type="module" src="{{ site.baseurl }}/assets/js/volunteer-signup.js"></script>
