@@ -4,7 +4,7 @@
             {%- assign page_paths = site.minima.nav_pages | default: default_paths -%}
             {%- assign titles_size = site.pages | map: 'title' | join: '' | size -%}
             <a class="site-title" rel="author" href="{{ '/' | relative_url }}" data-value="{{ site.title | escape }}">
-                <img id="site-logo" src="{{ site.baseurl }}/images/logo.png" alt="Logo">
+                <img id="site-logo" src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1627273049439-2X3EKF2VE4WVLSJZ7ZJC/MGB+Logo.png?format=300w" alt="My Good Brain logo">
             </a>
 
             {%- if titles_size > 0 -%}
@@ -33,6 +33,17 @@
                         </a>
                         <div class="nav-dropdown__menu" aria-label="{{ my_page.title | escape }} pages">
                             {%- for child in site.data.navigation.community -%}
+                            <a class="page-link nav-dropdown__item" href="{{ child.url | relative_url }}">{{ child.title | escape }}</a>
+                            {%- endfor -%}
+                        </div>
+                    </div>
+                    {%- elsif path == "navigation/resources.md" and site.data.navigation.resources -%}
+                    <div class="nav-dropdown">
+                        <a class="page-link nav-dropdown__link" href="{{ my_page.url | relative_url }}" aria-haspopup="true">
+                            {{ my_page.title | escape }}
+                        </a>
+                        <div class="nav-dropdown__menu" aria-label="{{ my_page.title | escape }} pages">
+                            {%- for child in site.data.navigation.resources -%}
                             <a class="page-link nav-dropdown__item" href="{{ child.url | relative_url }}">{{ child.title | escape }}</a>
                             {%- endfor -%}
                         </div>

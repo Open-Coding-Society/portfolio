@@ -1,64 +1,96 @@
 ---
-layout: page 
+layout: page
 title: Resources
 permalink: /resources
+hide_title: true
 ---
 
 <div class="ocs__container ocs__resources">
-  <section class="ocs__resources-hero">
-    <p class="ocs__resource-badge">Free resources for youth, educators, and caregivers</p>
-    <h1 class="ocs__resources-title">Mental Health Resources &amp; Toolkits</h1>
-    <p class="ocs__resources-lead">Explore downloadable worksheets, art-based emotional intelligence guides, and infographics created to support mental wellness.</p>
-    <div class="ocs__resources-tags" aria-label="Resource highlights">
-      <span class="ocs__resource-badge">Downloadable PDFs</span>
-      <span class="ocs__resource-badge">Art Therapy Tools</span>
-      <span class="ocs__resource-badge">100% Free</span>
-    </div>
+  <header class="ocs__resources-hero">
+    <p class="ocs__resources-eyebrow">Creative ideas for everyday wellbeing</p>
+    <h1 class="ocs__resources-title">Motivation, art, and emotional wellness</h1>
+    <p class="ocs__resources-lead">Find positive prompts, creative activities, and practical guides for young people, families, and educators. Explore by topic, then visit My Good Brain for its latest Motivation Monday collection and community resources.</p>
+    <a class="ocs__resources-hero-link" href="https://www.mygoodbrain.org/resources" target="_blank" rel="noopener noreferrer">Browse Motivation Monday on My Good Brain <span aria-hidden="true">&rarr;</span></a>
+  </header>
+
+  <section class="ocs__resources-overview" aria-label="Ways to explore">
+    <p><strong>Feel &amp; reflect</strong><span>Activities that make emotions easier to explore.</span></p>
+    <p><strong>Create &amp; cope</strong><span>Art-based ideas for mindfulness and self-expression.</span></p>
+    <p><strong>Learn together</strong><span>Guidance for families, educators, and communities.</span></p>
   </section>
 
-  <section class="ocs__resources-section" aria-labelledby="worksheets-title">
-    <h2 class="ocs__resources-section-title" id="worksheets-title">Worksheets &amp; Interactive Activities</h2>
-    <div class="ocs__grid ocs__grid--card">
-      <article class="ocs__grid-cell ocs__resource-card">
-        <div>
-          <h3>My Feelings Thermometer</h3>
-          <p class="ocs__card-description">Create a feelings thermometer to help your child learn about their emotions and how to regulate them.</p>
-          <p class="ocs__card-treatment">K–5th Grade · Printable PDF</p>
-        </div>
-        <a href="https://www.mygoodbrain.org/s/MGB-Feelings-Thermometer-Worksheet.pdf" class="ocs__btn accent fill">Download Worksheet</a>
-      </article>
-
-      <article class="ocs__grid-cell ocs__resource-card">
-        <div>
-          <h3>Using Art to Understand Emotions</h3>
-          <p class="ocs__card-description">Learn how creative activities can help children express, understand, and manage their feelings.</p>
-          <p class="ocs__card-treatment">Children &amp; Families · Infographic</p>
-        </div>
-        <a href="https://www.mygoodbrain.org/s/Using-Art-to-Understand-Emotions-Children.pdf" class="ocs__btn accent fill">Download Infographic</a>
-      </article>
+  <section class="ocs__resources-library" aria-labelledby="resource-library-title">
+    <div class="ocs__resources-library-heading">
+      <p class="ocs__resources-eyebrow">Browse by need</p>
+      <h2 id="resource-library-title">Find a helpful place to start</h2>
+      <p>Open a topic to find downloads, activities, and links from My Good Brain and trusted community partners.</p>
     </div>
+
+    <details class="ocs__resource-accordion" open>
+      <summary><span>01</span><span><strong>Feelings &amp; emotional awareness</strong><small>Printable tools for naming and understanding emotions</small></span></summary>
+      <div class="ocs__resource-accordion-content">
+        <p>Use a visual activity to start a gentle conversation about feelings and what helps during a big moment.</p>
+        <p><a class="ocs__resource-topic-link" href="{{ '/resources/feelings/' | relative_url }}">Explore feelings and emotional awareness <span aria-hidden="true">&rarr;</span></a></p>
+        <ul>
+          <li><a href="https://www.mygoodbrain.org/s/MGB-Feelings-Thermometer-Worksheet.pdf" target="_blank" rel="noopener noreferrer">My Feelings Thermometer worksheet <span>Printable PDF</span></a></li>
+          <li><a href="https://www.mygoodbrain.org/s/Using-Art-to-Understand-Emotions-Children.pdf" target="_blank" rel="noopener noreferrer">Using Art to Understand Emotions <span>Family infographic</span></a></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="ocs__resource-accordion">
+      <summary><span>02</span><span><strong>Art, mindfulness &amp; coping</strong><small>Creative ways to practice slowing down and self-expression</small></span></summary>
+      <div class="ocs__resource-accordion-content">
+        <p>My Good Brain uses art, play, and self-expression as accessible ways for children and teens to explore healthy coping strategies.</p>
+        <p><a class="ocs__resource-topic-link" href="{{ '/resources/art-and-coping/' | relative_url }}">Explore art, mindfulness, and coping <span aria-hidden="true">&rarr;</span></a></p>
+        <ul>
+          <li><a href="https://www.mygoodbrain.org/s/YMHA-MGB-Infographics-Week-3-BTS-Anxiety-Art-Youth-MH.pdf" target="_blank" rel="noopener noreferrer">Youth mental health and the role of art <span>Downloadable infographic</span></a></li>
+          <li><a href="https://www.mygoodbrain.org/sunday-art-club" target="_blank" rel="noopener noreferrer">Sunday Art Club <span>Free on-demand art activities</span></a></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="ocs__resource-accordion">
+      <summary><span>03</span><span><strong>Caregiver &amp; family support</strong><small>Ideas for showing up for children through everyday transitions</small></span></summary>
+      <div class="ocs__resource-accordion-content">
+        <p>Small, reassuring routines can help make room for connection when a child is working through a difficult feeling.</p>
+        <p><a class="ocs__resource-topic-link" href="{{ '/resources/caregivers/' | relative_url }}">Explore caregiver and family support <span aria-hidden="true">&rarr;</span></a></p>
+        <ul>
+          <li><a href="https://www.mygoodbrain.org/s/MGB-Caregiver-Calming-Tips-Little-Sound-Minds-1.pdf" target="_blank" rel="noopener noreferrer">Caregiver calming tips: Big Feelings, Little Voices <span>Printable guide</span></a></li>
+          <li><a href="https://www.mygoodbrain.org/military-families" target="_blank" rel="noopener noreferrer">Military families and caregiver resources <span>Family support links</span></a></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="ocs__resource-accordion">
+      <summary><span>04</span><span><strong>Schools, educators &amp; tool kits</strong><small>Creative learning resources for school communities</small></span></summary>
+      <div class="ocs__resource-accordion-content">
+        <p>The My Good Brain Tool Kit is a school-based program with art activities focused on topics such as mindfulness and stress management.</p>
+        <p><a class="ocs__resource-topic-link" href="{{ '/resources/educators/' | relative_url }}">Explore school and educator resources <span aria-hidden="true">&rarr;</span></a></p>
+        <ul>
+          <li><a href="https://www.mygoodbrain.org/mgbtoolkit" target="_blank" rel="noopener noreferrer">Learn about the My Good Brain Tool Kit <span>School-based program</span></a></li>
+          <li><a href="https://www.mygoodbrain.org/library-workshops" target="_blank" rel="noopener noreferrer">Library workshops <span>Arts and mental wellness</span></a></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="ocs__resource-accordion">
+      <summary><span>05</span><span><strong>Homeschool, enrichment &amp; community</strong><small>Learn about opportunities to connect with My Good Brain</small></span></summary>
+      <div class="ocs__resource-accordion-content">
+        <p>Families and teachers can learn about enrichment options, community workshops, and ways to get involved.</p>
+        <p><a class="ocs__resource-topic-link" href="{{ '/resources/workshops/' | relative_url }}">Explore workshops and enrichment <span aria-hidden="true">&rarr;</span></a></p>
+        <ul>
+          <li><a href="https://www.mygoodbrain.org/enrichment" target="_blank" rel="noopener noreferrer">Homeschool and enrichment information <span>For families and teachers</span></a></li>
+          <li><a href="https://www.mygoodbrain.org/events" target="_blank" rel="noopener noreferrer">My Good Brain events <span>Official event updates</span></a></li>
+          <li><a href="mailto:hello@mygoodbrain.org">Contact My Good Brain <span>hello@mygoodbrain.org</span></a></li>
+        </ul>
+      </div>
+    </details>
   </section>
 
-  <section class="ocs__resources-section" aria-labelledby="guides-title">
-    <h2 class="ocs__resources-section-title" id="guides-title">Educational Guides &amp; Infographics</h2>
-    <div class="ocs__grid ocs__grid--card">
-      <article class="ocs__grid-cell ocs__resource-card">
-        <div>
-          <h3>The State of Youth Mental Health and The Role of Art</h3>
-          <p class="ocs__card-description">Explore how art can help children express emotions and find direction in their mental wellness journey.</p>
-          <p class="ocs__card-treatment">Youth Mental Wellness · Infographic</p>
-        </div>
-        <a href="https://www.mygoodbrain.org/s/YMHA-MGB-Infographics-Week-3-BTS-Anxiety-Art-Youth-MH.pdf" class="ocs__btn accent fill">Download Infographic</a>
-      </article>
-
-      <article class="ocs__grid-cell ocs__resource-card">
-        <div>
-          <h3>Caregiver Calming Tips: Big Feelings, Little Voices</h3>
-          <p class="ocs__card-description">Learn ways to help calm your toddler with music and supportive caregiver strategies.</p>
-          <p class="ocs__card-treatment">Caregivers · Printable PDF</p>
-        </div>
-        <a href="https://www.mygoodbrain.org/s/MGB-Caregiver-Calming-Tips-Little-Sound-Minds-1.pdf" class="ocs__btn accent fill">Download Guide</a>
-      </article>
-    </div>
-  </section>
+  <aside class="ocs__resources-note">
+    <p class="ocs__resources-eyebrow">A note for caregivers</p>
+    <h2>Resources can support a conversation—not replace professional care.</h2>
+    <p>These activities are educational and are not a substitute for diagnosis or treatment. If you have concerns about a young person’s wellbeing, consider reaching out to a qualified health professional or a trusted local support service.</p>
+  </aside>
 </div>

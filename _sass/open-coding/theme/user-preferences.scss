@@ -1,19 +1,19 @@
 /* ---------- User theme: plain color (no gradients) ---------- */
 
 :root {
-  --pref-bg-color: #0b1220;
-  --pref-text-color: #e6eef8;
-  --pref-font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  --pref-bg-color: #fcfaff;
+  --pref-text-color: #382e47;
+  --pref-font-family: 'DM Sans', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
   --pref-font-size: 14px;
-  --pref-accent-color: #3b82f6;
+  --pref-accent-color: #7653b3;
   --pref-success-color: #22c55e;
-  --text-muted: #a0a0a0;
+  --text-muted: #70677c;
 
   /* Derived UI variables */
   --panel: var(--pref-bg-color);
-  --panel-mid: rgba(0,0,0,0.12);
-  --ui-bg: rgba(0,0,0,0.06);
-  --ui-border: rgba(255,255,255,0.06);
+  --panel-mid: #f4effa;
+  --ui-bg: #f8f5fc;
+  --ui-border: #e6deef;
   --emoji-bg: rgba(255,255,255,0.9);
   --glass-tint: color-mix(in srgb, var(--panel) 68%, transparent);
   --navbar-surface: color-mix(in srgb, var(--panel) 96%, var(--pref-text-color) 4%);

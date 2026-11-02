@@ -1,11 +1,14 @@
 @import "materials/main.scss";
 
 .site-header {
-    @extend .tintedGlass;
-    border-top: 0px solid;
-    border-bottom: 1px solid var(--navbar-border);
-    font-weight: bold;
+    position: relative;
+    border-top: 0;
+    border-bottom: 1px solid #e8def0;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 3px 16px rgba(80, 55, 116, 0.06);
+    font-weight: 600;
     z-index: 999999999;
+    backdrop-filter: blur(12px);
 }
 
 .site-nav {
@@ -14,12 +17,22 @@
 
 .site-nav .page-link {
     line-height: 1.5;
-    padding: 5px 10px;
-    margin-left: 20px;
+    padding: 8px 10px;
+    margin-left: 4px;
+    border-radius: 999px;
+    color: #503774 !important;
+    font-size: 0.94rem;
+    transition: background-color 160ms ease, color 160ms ease;
+}
+
+.site-nav .page-link:hover,
+.site-nav .page-link:focus-visible {
+    background-color: #f3edf9;
+    color: #8d527e !important;
 }
 
 .site-title {
-    color: var(--pref-text-color) !important;
+    color: #503774 !important;
 }
 
 .site-nav .page-link:not(:last-child) {
@@ -34,7 +47,74 @@
 .site-title:visited,
 .site-nav,
 .page-link {
-    font-weight: bolder;
+    font-weight: 600;
+}
+
+body,
+input,
+textarea,
+select,
+button {
+    font-family: 'DM Sans', Inter, system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+.page-content > .wrapper:has(
+    .ocs__mgb-home,
+    .ocs__mgb-about,
+    .ocs__community-hub,
+    .ocs__community-programs,
+    .ocs__community-volunteer,
+    .ocs-community-calendar,
+    .ocs__resources,
+    .ocs__resource-topic,
+    .ocs__mgb-blog,
+    .ocs__login-page
+) {
+    width: calc(100% - 3rem);
+    max-width: 1440px;
+}
+
+.page-content > .wrapper:has(
+    .ocs__mgb-home,
+    .ocs__mgb-about,
+    .ocs__community-hub,
+    .ocs__community-programs,
+    .ocs__community-volunteer,
+    .ocs-community-calendar,
+    .ocs__resources,
+    .ocs__resource-topic,
+    .ocs__mgb-blog,
+    .ocs__login-page
+) > article {
+    width: 100%;
+}
+
+.site-header .nav-dropdown__link[aria-expanded="true"] {
+    background-color: #f3edf9;
+}
+
+.site-header .nav-dropdown__menu {
+    min-width: 15rem;
+    padding: 0.45rem;
+    border: 1px solid #e8def0;
+    border-radius: 0.65rem;
+}
+
+.site-header .nav-dropdown__item {
+    display: block;
+    margin: 0;
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.4rem;
+    color: #503774 !important;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    white-space: normal;
+}
+
+.site-header .nav-dropdown__item:hover,
+.site-header .nav-dropdown__item:focus-visible {
+    background: #f7f1fb;
+    color: #8d527e !important;
 }
 
 @media screen and (max-width: fit-content) {
@@ -44,7 +124,70 @@
 }
 
 .site-header .wrapper {
-    max-width: fit-content !important;
+    display: flex;
+    width: calc(100% - 2rem);
+    max-width: 1280px !important;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.site-header #site-logo {
+    width: 48px;
+    height: 48px;
+    margin-right: 0.75rem;
+    object-fit: contain;
+}
+
+.site-nav .trigger {
+    gap: 0.2rem;
+}
+
+.site-nav .nav-trigger + label {
+    color: #503774;
+}
+
+.site-nav .nav-trigger + label .menu-icon svg path {
+    fill: #503774;
+}
+
+.nav-dropdown__menu {
+    background: #ffffff;
+    border-color: #e8def0;
+    box-shadow: 0 12px 28px rgba(80, 55, 116, 0.12);
+}
+
+.nav-dropdown__menu .nav-dropdown__item:hover,
+.nav-dropdown__menu .nav-dropdown__item:focus {
+    background: #f7f1fb;
+}
+
+@media (max-width: 599px) {
+    .site-header .wrapper {
+        width: calc(100% - 1.25rem);
+    }
+
+    .page-content > .wrapper:has(
+        .ocs__mgb-home,
+        .ocs__mgb-about,
+        .ocs__community-hub,
+        .ocs__community-programs,
+        .ocs__community-volunteer,
+        .ocs-community-calendar,
+        .ocs__resources,
+        .ocs__resource-topic,
+        .ocs__mgb-blog,
+        .ocs__login-page
+    ) {
+        width: calc(100% - 1rem);
+    }
+
+    .site-nav .trigger {
+        background: #ffffff;
+        border: 1px solid #e8def0;
+        border-radius: 0.75rem;
+        box-shadow: 0 12px 28px rgba(80, 55, 116, 0.12);
+    }
 }
 
 .project-tooltip-anchor {

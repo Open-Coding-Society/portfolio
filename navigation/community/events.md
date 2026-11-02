@@ -9,8 +9,17 @@ hide_title: true
 	<header class="ocs-community-calendar__header">
 		<span class="ocs__badge">My Good Brain · Community Calendar</span>
 		<h1>Community Events</h1>
-		<p class="ocs__description">Plan and keep track of upcoming community events.</p>
+		<p class="ocs__description">Make space for creative connection. Browse My Good Brain event updates, or use this personal calendar to plan a gathering of your own.</p>
 	</header>
+
+	<section class="ocs__events-note" aria-labelledby="events-note-title">
+		<div>
+			<p class="ocs__community-eyebrow">Make something together</p>
+			<h2 id="events-note-title">Art can bring a community closer.</h2>
+			<p>My Good Brain describes free, one-hour library workshops that pair mental wellness topics with art and crafts. Visit the organization’s official event page for current announcements and details.</p>
+		</div>
+		<a class="ocs__community-link" href="https://www.mygoodbrain.org/events" target="_blank" rel="noopener noreferrer">Visit official event updates <span aria-hidden="true">&rarr;</span></a>
+	</section>
 
 	<section class="ocs__card" aria-label="Community events calendar">
 		<div class="ocs-calendar-toolbar">
@@ -36,7 +45,7 @@ hide_title: true
 	</section>
 </div>
 
-<dialog class="ocs-calendar-dialog" id="calendar-event-dialog" aria-labelledby="calendar-dialog-title">
+<dialog class="ocs-calendar-dialog ocs__mgb-calendar-dialog" id="calendar-event-dialog" aria-labelledby="calendar-dialog-title">
 	<form class="ocs-calendar-dialog__form" id="calendar-event-form">
 		<input type="hidden" id="calendar-event-id">
 		<h2 id="calendar-dialog-title">Add an event</h2>

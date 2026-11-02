@@ -1,138 +1,79 @@
 ---
-layout: post
+layout: page
 title: About
 permalink: /about/
-comments: true
+hide_title: true
 ---
 
-## As a conversation Starter
+<div class="ocs__container ocs__mgb-about">
+  <section class="ocs__mgb-about-hero" aria-labelledby="mgb-about-title">
+    <img
+      class="ocs__mgb-about-image"
+      src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1611019132692-E4RRSMUQA66YQ7FPSBGV/AdobeStock_277896487.jpeg?format=1200w"
+      alt="Children sharing a joyful moment together in a classroom">
+    <div class="ocs__mgb-about-intro">
+      <p class="ocs__mgb-home-eyebrow">A little about us</p>
+      <h1 id="mgb-about-title">Art can help young people find their own way forward.</h1>
+      <p>My Good Brain is an arts-based nonprofit focused on promoting mental wellness among school-aged youth.</p>
+    </div>
+  </section>
 
-Here are some places I have lived.
+  <section class="ocs__mgb-about-story" aria-labelledby="mgb-about-story-title">
+    <div>
+      <p class="ocs__mgb-home-eyebrow">Why My Good Brain</p>
+      <h2 id="mgb-about-story-title">Room to feel. Space to create. Tools to grow.</h2>
+    </div>
+    <div class="ocs__mgb-about-story-copy">
+      <p>Children and teens are still learning how to understand what they feel and what helps them through hard moments. We believe art, play, and self-expression can make those lessons feel natural, welcoming, and accessible.</p>
+      <p>Our work brings psychology and creativity together to help young people practice healthy coping strategies for mental and emotional wellness.</p>
+      <a class="ocs__mgb-home-link" href="https://www.mygoodbrain.org/our-mission" target="_blank" rel="noopener noreferrer">Read our mission <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
 
-<comment>
-Flags are made using Wikipedia images
-</comment>
+  <section class="ocs__mgb-about-snapshot" aria-labelledby="mgb-about-snapshot-title">
+    <div class="ocs__mgb-about-snapshot-heading">
+      <p class="ocs__mgb-home-eyebrow">A snapshot of the work</p>
+      <h2 id="mgb-about-snapshot-title">Creative support, shaped for real life.</h2>
+      <p>These are practical details about the programs and resources—not claims about outcomes.</p>
+    </div>
+    <div class="ocs__mgb-about-stat-grid">
+      <article><strong>Since summer 2023</strong><span>Free community workshops pair mental wellness topics with related art and craft activities.</span></article>
+      <article><strong>Art · play · expression</strong><span>Three accessible ways the organization supports emotional learning.</span></article>
+    </div>
+    <p class="ocs__mgb-about-sources">Program details: <a href="https://www.mygoodbrain.org/library-workshops" target="_blank" rel="noopener noreferrer">Library workshops</a> · Approach: <a href="https://www.mygoodbrain.org/our-mission" target="_blank" rel="noopener noreferrer">My Good Brain’s mission</a>.</p>
+  </section>
 
-<style>
-    /* Style looks pretty compact, 
-       - grid-container and grid-item are referenced the code 
-    */
-    .grid-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Dynamic columns */
-        gap: 10px;
-    }
-    .grid-item {
-        text-align: center;
-    }
-    .grid-item img {
-        width: 100%;
-        height: 100px; /* Fixed height for uniformity */
-        object-fit: contain; /* Ensure the image fits within the fixed height */
-    }
-    .grid-item p {
-        margin: 5px 0; /* Add some margin for spacing */
-    }
+  <figure class="ocs__mgb-about-quote">
+    <blockquote>“Art is as natural as sunshine and as vital as nourishment.”</blockquote>
+    <figcaption>MaryAnn F. Kohl</figcaption>
+  </figure>
 
-    .image-gallery {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 10px;
-        }
+  <section class="ocs__mgb-about-pillars" aria-label="Our approach">
+    <article>
+      <span class="ocs__mgb-about-pillar-number" aria-hidden="true">01</span>
+      <h2>Make</h2>
+      <p>Creative activities offer a comfortable starting point for exploring thoughts and feelings.</p>
+    </article>
+    <article>
+      <span class="ocs__mgb-about-pillar-number" aria-hidden="true">02</span>
+      <h2>Play</h2>
+      <p>Play invites curiosity, discovery, and practice in a low-pressure setting.</p>
+    </article>
+    <article>
+      <span class="ocs__mgb-about-pillar-number" aria-hidden="true">03</span>
+      <h2>Grow</h2>
+      <p>Small, healthy coping strategies can become useful tools in everyday life.</p>
+    </article>
+  </section>
 
-    .image-gallery img {
-        max-height: 150px;
-        object-fit: cover;
-        border-radius: 5px;
-    }
-</style>
-
-<!-- This grid_container class is used by CSS styling and the id is used by JavaScript connection -->
-<div class="grid-container" id="grid_container">
-    <!-- content will be added here by JavaScript -->
-</div>
-
-<script>
-    // 1. Make a connection to the HTML container defined in the HTML div
-    var container = document.getElementById("grid_container"); // This container connects to the HTML div
-
-    // 2. Define a JavaScript object for our http source and our data rows for the Living in the World grid
-    var http_source = "https://upload.wikimedia.org/wikipedia/commons/";
-    var living_in_the_world = [
-        {"flag": "0/01/Flag_of_California.svg", "greeting": "Hey", "description": "California - forever"},
-        {"flag": "b/b9/Flag_of_Oregon.svg", "greeting": "Hi", "description": "Oregon - 9 years"},
-        {"flag": "b/be/Flag_of_England.svg", "greeting": "Alright mate", "description": "England - 2 years"},
-        {"flag": "e/ef/Flag_of_Hawaii.svg", "greeting": "Aloha", "description": "Hawaii - 2 years"},
-    ];
-
-    // 3a. Consider how to update style count for size of container
-    // The grid-template-columns has been defined as dynamic with auto-fill and minmax
-
-    // 3b. Build grid items inside of our container for each row of data
-    for (const location of living_in_the_world) {
-        // Create a "div" with "class grid-item" for each row
-        var gridItem = document.createElement("div");
-        gridItem.className = "grid-item";  // This class name connects the gridItem to the CSS style elements
-        // Add "img" HTML tag for the flag
-        var img = document.createElement("img");
-        img.src = http_source + location.flag; // concatenate the source and flag
-        img.alt = location.flag + " Flag"; // add alt text for accessibility
-
-        // Add "p" HTML tag for the description
-        var description = document.createElement("p");
-        description.textContent = location.description; // extract the description
-
-        // Add "p" HTML tag for the greeting
-        var greeting = document.createElement("p");
-        greeting.textContent = location.greeting;  // extract the greeting
-
-        // Append img and p HTML tags to the grid item DIV
-        gridItem.appendChild(img);
-        gridItem.appendChild(description);
-        gridItem.appendChild(greeting);
-
-        // Append the grid item DIV to the container DIV
-        container.appendChild(gridItem);
-    }
-</script>
-
-### Journey through Life
-
-Here is what I did at those places
-
-- 🏫 Lots of Elementary Schools in Tucson, LA, Honolulu, and Glendale (CA)
-- 🏫 Middle and High School in Glendale (CA), Hoover High graduated '77
-- 🎓 Glendale CA Community College, UCLA Extension, LA Wilshire Computer Tech School '77 to '79
-- ⛪ England, London Missionary for Church of Jesus Christ of Latter-day Saints '79 to '81
-- 💼 Culver City, Glendale CA founder at Ashton-Tate, original PC's dBase 2 and 3 '82 to '87
-- 🎓 Eugene Oregon Undergraduate CompSci Degree at University of Oregon (Go Ducks!) '89 to '91
-- 💼 Eugene Oregon, founder and owner @ Microniche `88, Point Control CAD CAM developer '91 to '96
-- 🏢 San Diego CA Qualcomm, Satellite Comm and 1st Mobile OS (BREW) '96 to '19
-- 👨‍🏫 San Diego CA Teacher of Computer Science @ Del Norte High School San Diego '19 to present
-
-### Culture, Family, and Fun
-
-Everything for me, as for many others, revolves around family and faith.
-
-- My mother told me that I was Danish, English. and Irish, here is my researched [family tree]({{site.baseurl}}/images/about/familytree.png)
-- My family is pretty big as I have been married twice, my 1st wife passed away.  We have had 5 kids, 4 adopted by me, 1 biological.  Plus, there are three grandkids.  My name to my grandkids is Abuilito.
-- The gallery of pics has some of my family, fun, culture and faith memories.
-
-<comment>
-Gallery of Pics, scroll to the right for more ...
-</comment>
-<div class="image-gallery">
-  <img src="{{site.baseurl}}/images/about/missionary.jpg" alt="Image 1">
-  <img src="{{site.baseurl}}/images/about/john_tamara.jpg" alt="Image 2">
-  <img src="{{site.baseurl}}/images/about/tamara_fam.jpg" alt="Image 3">
-  <img src="{{site.baseurl}}/images/about/surf.jpg" alt="Image 4">
-  <img src="{{site.baseurl}}/images/about/john_lora.jpg" alt="Image 5">
-  <img src="{{site.baseurl}}/images/about/lora_fam.jpg" alt="Image 6">
-  <img src="{{site.baseurl}}/images/about/lora_fam2.jpg" alt="Image 7">
-  <img src="{{site.baseurl}}/images/about/pj_party.jpg" alt="Image 8">
-  <img src="{{site.baseurl}}/images/about/trent_family.png" alt="Image 9">
-  <img src="{{site.baseurl}}/images/about/claire.jpg" alt="Image 10">
-  <img src="{{site.baseurl}}/images/about/grandkids.jpg" alt="Image 11">
-  <img src="{{site.baseurl}}/images/about/farm.jpg" alt="Image 12">
+  <section class="ocs__mgb-about-next">
+    <div>
+      <p class="ocs__mgb-home-eyebrow">Find your starting point</p>
+      <h2>Explore what we’re making possible together.</h2>
+    </div>
+    <div class="ocs__mgb-about-next-links">
+      <a class="ocs__mgb-home-link" href="{{ site.baseurl }}/community/">Visit the Community Hub <span aria-hidden="true">&rarr;</span></a>
+      <a class="ocs__mgb-home-link" href="{{ site.baseurl }}/resources">Browse resources <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </section>
 </div>

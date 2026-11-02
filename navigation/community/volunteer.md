@@ -7,9 +7,9 @@ hide_title: true
 
 <div class="ocs__container ocs__community-volunteer">
   <header class="ocs__community-volunteer-header">
-    <span class="ocs__badge">My Good Brain · Get Involved</span>
+    <p class="ocs__community-eyebrow">Bring your time and creativity</p>
     <h1>Volunteer with MGB</h1>
-    <p class="ocs__lead">Learn more about how to get involved with volunteer work at My Good Brain.</p>
+    <p class="ocs__lead">Help make art, emotional wellness, and supportive community experiences more accessible to young people and families.</p>
   </header>
 
   <section class="ocs__card" aria-labelledby="teen-volunteer">

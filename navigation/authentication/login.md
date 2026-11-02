@@ -4,94 +4,50 @@ title: Login
 permalink: /login
 search_exclude: true
 show_reading_time: false
+hide_title: true
 ---
-<style>
-    .submit-button {
-        width: 100%;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-    .login-container {
-        display: flex;
-        /* Use flexbox for side-by-side layout */
-        justify-content: space-between;
-        /* Add space between the cards */
-        align-items: flex-start;
-        /* Align items to the top */
-        gap: 20px;
-        /* Add spacing between the cards */
-        flex-wrap: nowrap;
-        /* Prevent wrapping of the cards */
-    }
-
-    .login-card,
-    .signup-card {
-        flex: 1 1 calc(50% - 20px);
-        max-width: 45%;
-        box-sizing: border-box;
-        background: #1e1e1e;
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        padding: 20px;
-        color: white;
-        overflow: hidden;
-    }
-
-    .login-card h1 {
-        margin-bottom: 20px;
-    }
-
-    .signup-card h1 {
-        margin-bottom: 20px;
-    }
-
-    .form-group {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
-
-    input {
-        width: 100%;
-        box-sizing: border-box;
-    }
-</style>
-<br>
-<div class="login-container">
+<div class="ocs__container ocs__login-page">
+    <header class="ocs__login-intro">
+        <p class="ocs__community-eyebrow">My Good Brain community</p>
+        <h1>Welcome back</h1>
+        <p>Sign in to your account, or create one to continue.</p>
+    </header>
+    <div class="login-container">
     <!-- Python Login Form -->
     <div class="login-card">
-        <h1 id="pythonTitle">User Login</h1>
+        <h2 id="pythonTitle">User Login</h2>
         <hr>
         <form id="pythonForm" onsubmit="loginBoth(); return false;">
             <div class="form-group">
-                <input type="text" id="uid" placeholder="GitHub ID" required>
+                <input type="text" id="uid" placeholder="Email or username" autocomplete="username" required>
             </div>
             <div class="form-group">
-                <input type="password" id="password" placeholder="Password" required>
+                <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
             </div>
             <p>
                 <button type="submit" class="large primary submit-button">Login</button>
             </p>
-            <p id="message" style="color: red;"></p>
+            <p id="message" role="status" aria-live="polite"></p>
         </form>
     </div>
     <div class="signup-card">
-        <h1 id="signupTitle">Sign Up</h1>
+        <h2 id="signupTitle">Create an account</h2>
         <hr>
         <form id="signupForm" onsubmit="signup(); return false;">
             <div class="form-group">
-                <input type="text" id="name" placeholder="Name" required>
+                <input type="text" id="name" placeholder="Your full name" autocomplete="name" required>
             </div>
             <div class="form-group">
-                <input type="text" id="signupUid" placeholder="GitHub ID" required>
+                <input type="text" id="signupUid" placeholder="Choose a username" autocomplete="username" required>
             </div>
             <div class="form-group">
                 <input type="text" id="signupSid" placeholder="Student ID" required>
             </div>
             <div class="form-group">
-                <input type="text" id="signupEmail" placeholder="Email" required>
+                <input type="email" id="signupEmail" placeholder="Your email address" autocomplete="email" required>
             </div>
             <div class="form-group">
-                <input type="password" id="signupPassword" placeholder="Password" required>
+                <input type="password" id="signupPassword" placeholder="Create a password" autocomplete="new-password" required>
             </div>
             <p>
                 <label class="switch">
@@ -106,9 +62,10 @@ show_reading_time: false
             <p>
                 <button type="submit" class="large primary submit-button">Sign Up</button>
             </p>
-            <p id="signupMessage" style="color: green;"></p>
+            <p id="signupMessage" role="status" aria-live="polite"></p>
         </form>
     </div>
+</div>
 </div>
 <script type="module">
     import { login, pythonURI, javaURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';

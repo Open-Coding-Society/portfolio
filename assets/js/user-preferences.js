@@ -72,11 +72,11 @@
   };
 
   const SITE_DEFAULT = {
-    bg: '#121212',
-    text: '#F0F0F0',
-    font: "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
+    bg: '#fcfaff',
+    text: '#382e47',
+    font: "'DM Sans', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
     size: 14,
-    accent: '#4CAFEF',
+    accent: '#7653b3',
   };
 
   const PRESETS = {
@@ -87,9 +87,9 @@
       size: 14, accent: '#3b82f6',
     },
     Light: {
-      bg: '#ffffff', text: '#FF80AA',
-      font: "Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
-      size: 14, accent: '#2563eb',
+      bg: '#fcfaff', text: '#382e47',
+      font: "'DM Sans', Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial",
+      size: 14, accent: '#7653b3',
     },
     Green: {
       bg: '#154734', text: '#e6f6ef',

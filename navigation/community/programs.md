@@ -1,14 +1,16 @@
 ---
-layout: post
-title: My Good Brain - Community Programs Hub
+layout: page
+title: Community Programs
 permalink: /community/programs/
+hide_title: true
+show_reading_time: false
 ---
 
 <div class="ocs__container ocs__community-programs">
   <header class="ocs__community-programs-header">
-    <span class="ocs__badge">My Good Brain</span>
-    <h1>Community Programs Hub</h1>
-    <p class="ocs__lead">Explore our active wellness initiatives, workshops, and youth support networks in San Diego.</p>
+    <p class="ocs__community-eyebrow">Creative support for growing minds</p>
+    <h1>Community Programs</h1>
+    <p class="ocs__lead">Explore My Good Brain programs, workshops, and resources that bring art, play, and emotional wellness into community life.</p>
   </header>
 
   <section class="ocs__card ocs__community-program-controls" aria-label="Find a program">
@@ -31,7 +33,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Family Outreach</span>
         <h2>San Diego Military Families</h2>
-        <p class="ocs__text">Specialized arts-based wellness sessions designed to support military youth and families.</p>
+        <p class="ocs__text">Explore family and caregiver resources alongside My Good Brain programs for children and families.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/military-families" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Visit Program <span aria-hidden="true">&rarr;</span></a>
@@ -42,7 +44,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Family Outreach</span>
         <h2>Homeschool &amp; Charter Families</h2>
-        <p class="ocs__text">Flexible art therapy and expressive learning curriculums for homeschool networks.</p>
+        <p class="ocs__text">Learn how families and teachers can request My Good Brain enrichment services through charter schools.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/enrichment" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Visit Program <span aria-hidden="true">&rarr;</span></a>
@@ -53,7 +55,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Workshops &amp; Kits</span>
         <h2>MGB Tool Kit</h2>
-        <p class="ocs__text">Hands-on creative toolkits filled with mindfulness activities and art supplies.</p>
+        <p class="ocs__text">A school-based program with art activities that introduce topics such as mindfulness and stress management.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/mgbtoolkit" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Request Kit <span aria-hidden="true">&rarr;</span></a>
@@ -64,7 +66,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Workshops &amp; Kits</span>
         <h2>Art x Mental Wellness Workshops</h2>
-        <p class="ocs__text">Guided interactive sessions connecting artistic expression with emotional learning.</p>
+        <p class="ocs__text">Free, one-hour community workshops pair mental wellness topics with related arts and crafts activities.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/library-workshops" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">View Schedule <span aria-hidden="true">&rarr;</span></a>
@@ -75,7 +77,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Youth &amp; Kids</span>
         <h2>Kids at Heart</h2>
-        <p class="ocs__text">Community gatherings fostering peer connection and emotional resilience through play.</p>
+        <p class="ocs__text">Discover My Good Brain’s activities and resources for young people and families.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/kidsatheart" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Explore Program <span aria-hidden="true">&rarr;</span></a>
@@ -86,7 +88,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Youth &amp; Kids</span>
         <h2>Little Sound Minds</h2>
-        <p class="ocs__text">Early childhood mindfulness initiatives introducing music, movement, and art.</p>
+        <p class="ocs__text">Explore early-childhood resources, including caregiver guidance for helping little ones through big feelings.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/little-sound-minds" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Explore Program <span aria-hidden="true">&rarr;</span></a>
@@ -97,7 +99,7 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Youth &amp; Kids</span>
         <h2>Little Mess Club</h2>
-        <p class="ocs__text">Sensory art play sessions encouraging children to explore emotions freely.</p>
+        <p class="ocs__text">Find creative ways to make room for exploration, play, and emotional expression.</p>
       </div>
       <div class="ocs__links">
         <a href="https://www.mygoodbrain.org/little-mess-club" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Explore Program <span aria-hidden="true">&rarr;</span></a>
@@ -111,7 +113,7 @@ permalink: /community/programs/
         <p class="ocs__text">Discussions and interviews highlighting youth mental health and art stories.</p>
       </div>
       <div class="ocs__links">
-        <a href="https://www.mygoodbrain.org/podcast" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Listen Now <span aria-hidden="true">🎧</span></a>
+        <a href="https://www.mygoodbrain.org/podcast" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Listen Now <span aria-hidden="true">&rarr;</span></a>
       </div>
     </article>
 
@@ -119,10 +121,10 @@ permalink: /community/programs/
       <div>
         <span class="ocs__badge">Media &amp; Arts</span>
         <h2>Sunday Art Club</h2>
-        <p class="ocs__text">Weekly drop-in art clubs where kids and teens collaborate in a safe space.</p>
+        <p class="ocs__text">Free, on-demand arts and crafts videos that introduce social-emotional learning themes at home.</p>
       </div>
       <div class="ocs__links">
-        <a href="https://www.mygoodbrain.org/sunday-art-club" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Join Session <span aria-hidden="true">&rarr;</span></a>
+        <a href="https://www.mygoodbrain.org/sunday-art-club" target="_blank" rel="noopener noreferrer" class="ocs__btn accent fill">Watch activities <span aria-hidden="true">&rarr;</span></a>
       </div>
     </article>
 

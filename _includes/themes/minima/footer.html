@@ -1,15 +1,26 @@
 <footer id="masterFooter" class="site-footer h-card">
     <data class="u-url" href="{{ '/' | relative_url }}"></data>
-
-    <!-- <div class="wrapper">
-
-        <div class="social-links">
-            {%- include social.html -%}
+    <div class="mgb-footer-content">
+        <div class="mgb-footer-brand">
+            <a class="mgb-footer-name" href="{{ '/' | relative_url }}">My Good Brain</a>
+            <p>Art, play, and emotional wellness for growing minds.</p>
         </div>
-
-    </div> -->
-
-    <!--<p style="font-style: italic;">OpenAesthetic v3.0rc1.1</p>-->
+        <nav class="mgb-footer-nav" aria-label="Explore My Good Brain">
+            <strong>Explore</strong>
+            <a href="{{ '/about/' | relative_url }}">About</a>
+            <a href="{{ '/resources' | relative_url }}">Resources</a>
+            <a href="{{ '/community/programs/' | relative_url }}">Programs</a>
+            <a href="{{ '/community/events/' | relative_url }}">Events</a>
+            <a href="{{ '/blogs/' | relative_url }}">Stories</a>
+        </nav>
+        <div class="mgb-footer-contact">
+            <strong>Connect</strong>
+            <a href="{{ '/community/volunteer/' | relative_url }}">Volunteer</a>
+            <a href="mailto:hello@mygoodbrain.org">hello@mygoodbrain.org</a>
+            <a href="https://www.mygoodbrain.org" target="_blank" rel="noopener noreferrer">Visit mygoodbrain.org</a>
+            <a href="https://www.mygoodbrain.org/donate" target="_blank" rel="noopener noreferrer">Support the work</a>
+        </div>
+    </div>
 
     <div class="footer-links">
         <div class="footer-previous">
@@ -26,7 +37,7 @@
             {% unless page.footer.home == nil %}
                 <a class="footer-navigation footer-home-link" href="{{ page.footer.home | relative_url }}">
                     <button class="footer-home-btn medium filledTinted primary">
-                        🏠︎ Home Page
+                    Home Page
                     </button>
                 </a>
             {% endunless %}

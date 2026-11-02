@@ -7,112 +7,76 @@ hide_title: true
 
 <div class="ocs__container ocs__community-hub">
   <header class="ocs__community-hub-hero">
-    <span class="ocs__badge">My Good Brain · Community Portal</span>
-    <h1>Empowering Youth Through Creative Wellness</h1>
+    <p class="ocs__community-eyebrow">My Good Brain · Community</p>
+    <h1>Good things grow when we make them together.</h1>
     <p class="ocs__lead">
-      Welcome to the central resource hub for San Diego youth, families, and volunteers. Explore active programs, discover upcoming events, or join our volunteer network.
+      Find creative programs, community gatherings, and ways to support the mental wellness of children and teens.
     </p>
 
-    <div class="ocs__stats ocs__community-stats" aria-label="Community highlights">
-      <div class="ocs__stat">
-        <span class="ocs__stat-value">10+</span>
-        <span class="ocs__stat-label">Active Programs</span>
+    <div class="ocs__community-highlights" aria-label="Community highlights">
+      <div class="ocs__community-highlight">
+        <span class="ocs__community-highlight-value">Art</span>
+        <span class="ocs__community-highlight-label">A way to express</span>
       </div>
-      <div class="ocs__stat">
-        <span class="ocs__stat-value">100%</span>
-        <span class="ocs__stat-label">Free Community Resources</span>
+      <div class="ocs__community-highlight">
+        <span class="ocs__community-highlight-value">Play</span>
+        <span class="ocs__community-highlight-label">A way to explore</span>
       </div>
-      <div class="ocs__stat">
-        <span class="ocs__stat-value">San Diego</span>
-        <span class="ocs__stat-label">Youth &amp; Family Outreach</span>
+      <div class="ocs__community-highlight">
+        <span class="ocs__community-highlight-value">Together</span>
+        <span class="ocs__community-highlight-label">A way to grow</span>
       </div>
     </div>
   </header>
 
-  <section class="ocs__community-hub-grid" aria-label="Community resources">
+  <section class="ocs__community-hub-grid" aria-label="Ways to get involved">
     <article class="ocs__card ocs__community-hub-card">
       <div>
-        <span aria-hidden="true">🎨</span>
-        <span class="ocs__badge">Interactive Hub</span>
-        <h2>Community Programs</h2>
+        <span class="ocs__community-card-number" aria-hidden="true">01</span>
+        <p class="ocs__community-card-label">Explore</p>
+        <h2>Programs for growing minds</h2>
         <p class="ocs__text">
-          Browse our suite of 10+ art and mental wellness initiatives, including Sunday Art Club, Teen Creative Arts, MGB Tool Kits, and military family workshops.
+          Find art-based activities and programs that help young people build healthy ways to care for their mental and emotional wellness.
         </p>
-        <div class="ocs__community-card-tags" aria-label="Program features">
-          <span class="ocs__badge">Live Search &amp; Tag Filtering</span>
-          <span class="ocs__badge">Hands-on Art Therapy Kits</span>
-          <span class="ocs__badge">Youth Wellness Podcast</span>
-        </div>
       </div>
       <div class="ocs__links">
-        <a href="{{ site.baseurl }}/community/programs/" class="ocs__btn accent fill">Explore Programs <span aria-hidden="true">&rarr;</span></a>
+        <a href="{{ site.baseurl }}/community/programs/" class="ocs__community-link">Explore programs <span aria-hidden="true">&rarr;</span></a>
       </div>
     </article>
 
     <article class="ocs__card ocs__community-hub-card">
       <div>
-        <span aria-hidden="true">📅</span>
-        <span class="ocs__badge">Live Workshops</span>
-        <h2>Events &amp; Calendar</h2>
+        <span class="ocs__community-card-number" aria-hidden="true">02</span>
+        <p class="ocs__community-card-label">Gather</p>
+        <h2>Make something together</h2>
         <p class="ocs__text">
-          Join us for interactive drop-in sessions, community art gatherings, library workshops, and seasonal mental health summits.
+          Discover community art events, workshops, and opportunities to connect with young people and families.
         </p>
-        <div class="ocs__community-card-tags" aria-label="Event features">
-          <span class="ocs__badge">Local San Diego Gatherings</span>
-          <span class="ocs__badge">Flexible Drop-in Schedules</span>
-          <span class="ocs__badge">Safe Peer Support Spaces</span>
-        </div>
       </div>
       <div class="ocs__links">
-        <a href="{{ site.baseurl }}/community/events/" class="ocs__btn accent fill">View Schedule <span aria-hidden="true">&rarr;</span></a>
+        <a href="{{ site.baseurl }}/community/events/" class="ocs__community-link">See events <span aria-hidden="true">&rarr;</span></a>
       </div>
     </article>
 
     <article class="ocs__card ocs__community-hub-card">
       <div>
-        <span aria-hidden="true">🤝</span>
-        <span class="ocs__badge">Get Involved</span>
-        <h2>Volunteer Network</h2>
+        <span class="ocs__community-card-number" aria-hidden="true">03</span>
+        <p class="ocs__community-card-label">Join in</p>
+        <h2>Bring your good ideas</h2>
         <p class="ocs__text">
-          Make a direct impact in youth mental health. Become a workshop assistant, content creator, event coordinator, or peer mentor.
+          Share your time, creativity, or skills to help build a welcoming community around youth mental wellness.
         </p>
-        <div class="ocs__community-card-tags" aria-label="Volunteer benefits">
-          <span class="ocs__badge">Student Leadership Roles</span>
-          <span class="ocs__badge">Service Hour Credit</span>
-          <span class="ocs__badge">Creative Team Projects</span>
-        </div>
       </div>
       <div class="ocs__links">
-        <a href="{{ site.baseurl }}/community/volunteer/" class="ocs__btn accent fill">Join as Volunteer <span aria-hidden="true">&rarr;</span></a>
+        <a href="{{ site.baseurl }}/community/volunteer/" class="ocs__community-link">Volunteer with us <span aria-hidden="true">&rarr;</span></a>
       </div>
     </article>
   </section>
 
-  <section class="ocs__card" aria-labelledby="community-resource-list">
-    <h2 id="community-resource-list" class="ocs__section-title">Community Resources</h2>
-    <div class="ocs__table-wrap">
-      <table class="ocs__table">
-        <thead>
-          <tr><th>Resource Name</th><th>Description</th><th>Link</th></tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Programs</td>
-            <td>Programs offered by the MyGoodBrain Community</td>
-            <td><a href="{{ site.baseurl }}/community/programs/">Programs</a></td>
-          </tr>
-          <tr>
-            <td>Events</td>
-            <td>Events hosted by MyGoodBrain</td>
-            <td><a href="{{ site.baseurl }}/community/events/">Events</a></td>
-          </tr>
-          <tr>
-            <td>Volunteering</td>
-            <td>Volunteer opportunities</td>
-            <td><a href="{{ site.baseurl }}/community/volunteer/">Volunteering</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <section class="ocs__community-note" aria-labelledby="community-note-title">
+    <p class="ocs__community-eyebrow">A gentle reminder</p>
+    <h2 id="community-note-title">There’s no one right way to begin.</h2>
+    <p>Whether you’re looking for an activity, a welcoming event, or a way to lend a hand, we’re glad you’re here.</p>
+    <a class="ocs__community-link" href="{{ site.baseurl }}/resources">Browse free resources <span aria-hidden="true">&rarr;</span></a>
   </section>
 </div>
