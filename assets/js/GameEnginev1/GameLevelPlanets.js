@@ -1,10 +1,10 @@
 // Adventure Game Custom Level
 // Exported from GameBuilder on 2026-02-13T00:22:56.962Z
 // How to use this file:
-// 1) Save as assets/js/GameEnginev1/GameLevelPlanets.js in your repo.
+// 1) Save as assets/js/adventureGame/GameLevelPlanets.js in your repo.
 // 2) Reference it in your runner or level selector. Examples:
 //    import GameLevelPlanets from '/assets/js/GameEnginev1/GameLevelPlanets.js';
-//    import GameLevelPlanets from '/assets/js/GameEnginev1/GameLevelPlanets.js';
+//    import GameLevelPlanets from '/assets/js/adventureGame/GameLevelPlanets.js';
 //    export const gameLevelClasses = [GameLevelPlanets, GameLevelPlanets];
 //    // or pass it directly to your GameControl as the only level.
 // 3) Ensure images exist and paths resolve via 'path' provided by the engine.

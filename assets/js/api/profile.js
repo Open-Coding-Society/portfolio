@@ -13,22 +13,25 @@ export function putUpdate(options) {
     // Clear the message area
 
     // Send PUT request
-    fetch(options.URL, requestOptions)
+    // Resolves to true when the server accepted the update and false when it didn't,
+    // so a caller can await it.
+    return fetch(options.URL, requestOptions)
         .then(response => {
             // Trap error response from Web API
             if (!response.ok) {
                 const errorMsg = 'Error: ' + response.status;
                 console.log(errorMsg);
-                return;
+                return false;
             }
             // Success!!!
-            // Call the callback function
-            options.callback();
+            // Call the callback function, if there is one
+            options.callback?.();
+            return true;
         })
         .catch(error => {
             // Handle network errors
             console.log('Possible CORS or Service Down error: ' + error);
-           
+            return false;
         });
 }
 
@@ -46,22 +49,25 @@ export function postUpdate(options) {
 
     // Clear the message area
     // Send POST request
-    fetch(options.URL, requestOptions)
+    // Resolves to true when the server accepted the update and false when it didn't,
+    // so a caller can await it.
+    return fetch(options.URL, requestOptions)
         .then(response => {
             // Trap error response from Web API
             if (!response.ok) {
                 const errorMsg = 'Error: ' + response.status;
                 console.log(errorMsg);
-                return;
+                return false;
             }
             // Success!!!
-            // Call the callback function
-            options.callback();
+            // Call the callback function, if there is one
+            options.callback?.();
+            return true;
         })
         .catch(error => {
             // Handle network errors
             console.log('Possible CORS or Service Down error: ' + error);
-           
+            return false;
         });
 }
 
@@ -132,12 +138,11 @@ export function deleteData(options)  {
          
          // Java User Logout
 export async function logoutUserJava() {
-             const logoutURL = javaURI + '/my/logout'; // Logout API endpoint
+             const logoutURL = javaURI + '/api/logout'; // Logout API endpoint
          
              const options = {
                  ...fetchOptions, // Include necessary headers from fetchOptions
                  method: 'POST',
-                 credentials: 'include', // Ensure cookies like JWT are included
              };
          
              console.log('Logout initiated.');
@@ -165,12 +170,10 @@ export async function logoutUserJava() {
 
 // session
 // asynchronous session response
-//session call api----?
+// session call api----?
 // then--> javascript promise
 // data loaded
 // screen establishes 5 different sessions
 // talk about play
 // iteration style ----> little pieces
 // Your teacher likes to iterate -->
-// =======
-// >>>>>>> 3bc039a1ce9c33f5a7dac69ee7fa36f013b5533f

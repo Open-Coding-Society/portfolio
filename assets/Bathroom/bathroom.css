@@ -1,0 +1,306 @@
+:root {
+    --primary-light: #8abdff;
+    --primary: #6d5dfc;
+    --primary-dark: #5b0eeb;
+    --white: #222222;
+    --greyLight-1: #111111;
+    --greyLight-2: #000000;
+    --greyDark: #ffffff;
+}
+
+/* Reset styles */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    box-sizing: border-box;
+    font-size: 70%;
+    /* Increase this to make everything larger */
+    overflow-y: scroll;
+    background: var(--greyLight-1);
+
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+@media screen and (min-width: 900px) {
+    html {
+        font-size: 85%;
+        /* Increase this for larger screens */
+    }
+}
+
+/* Container for profile page */
+.container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Poppins", sans-serif;
+    background: var(--greyLight-1);
+}
+
+.components {
+    border-radius: 3rem;
+    box-shadow: 0.8rem 0.8rem 1.4rem var(--greyLight-2), -0.2rem -0.2rem 1.8rem var(--white);
+    padding: 4rem;
+    display: grid;
+    align-items: center;
+
+
+    grid-template-rows: repeat(2, auto);
+    grid-column-gap: 20px;
+    grid-row-gap: 20px;
+}
+
+.div1 {
+    grid-area: 1 / 1 / 2 / 2;
+}
+
+.div2 {
+    grid-area: 2 / 1 / 3 / 2;
+}
+
+.queue-buttons {
+    display: flex;
+    gap: 1rem;
+    /* Space between each button */
+    justify-content: space-around;
+    /* Evenly distribute buttons */
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    /* Adds space below the buttons */
+
+}
+
+.info-div {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-around;
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+    height: 100%;
+}
+
+
+/* Name and email sections */
+.name,
+.email-info {
+    background-color: var(--greyLight-1);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+}
+
+.frequency,
+.duration {
+    flex: 1;
+    /* Makes both take equal widths */
+    background-color: var(--primary);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    color: var(--greyLight-1);
+    box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* Center content vertically */
+    height: 100%;
+}
+
+/* History and comparison sections */
+.history,
+.comparison {
+    background-color: var(--greyLight-1);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+}
+
+/* Button Styles */
+button,
+.btn {
+    width: 100%;
+    height: auto;
+    /* Adjust height to be flexible like the frequency and duration containers */
+    border-radius: 1rem;
+    padding: 1.5rem;
+    /* Padding matches the containers */
+    background-color: #111111;
+    /* Same background color */
+    color: #888;
+    /* Same text color */
+    box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+    /* Same shadow */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.3s ease;
+    text-align: center;
+    border: none;
+    /* Ensures no unwanted border */
+    font-weight: bold;
+
+    text-decoration: none;
+
+}
+
+a {
+    text-decoration: none;
+}
+
+
+button:hover,
+.btn:hover {
+    color: white;
+}
+
+button:active,
+.btn:active {
+    box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+}
+
+/* Styling for Comparison with Class Data container */
+.comparison {
+    position: relative;
+    height: 20rem;
+    /* Adjust the height as needed */
+}
+
+/* Styling for the embedded graph to fit within the container */
+#comparisonGraph {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Form Input */
+.form__input,
+.form__textarea {
+    height: 4rem;
+    border: none;
+    border-radius: 1rem;
+    font-size: 1.4rem;
+    padding-left: 1.4rem;
+    box-shadow: inset 0.2rem 0.2rem 0.5rem var(--greyLight-2), inset -0.2rem -0.2rem 0.5rem var(--white);
+    background: none;
+    font-family: inherit;
+    color: var(--greyDark);
+    max-width: 100%;
+}
+
+.form__textarea {
+    height: 8rem;
+    resize: none;
+}
+
+.form__input::placeholder,
+.form__textarea::placeholder {
+    color: var(--greyLight-2);
+}
+
+.form__input:focus,
+.form__textarea:focus {
+    outline: none;
+    box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+}
+
+/* Error Chip */
+.chip {
+    justify-self: center;
+    width: 20rem;
+    height: 4rem;
+    border-radius: 1rem;
+    box-shadow: 0.3rem 0.3rem 0.6rem var(--greyLight-2), -0.2rem -0.2rem 0.5rem var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: opacity 0.3s ease-in-out;
+    background-color: var(--primary-light);
+    color: var(--greyDark);
+    padding: 0 1rem;
+}
+
+.chip__icon,
+.chip__close {
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+
+.chip p {
+    font-size: 1.2rem;
+}
+
+.chip.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.chip__icon {
+    color: var(--primary);
+}
+
+.chip__close {
+    color: var(--greyLight-2);
+}
+
+/* Queue header styling */
+.queue-header {
+    font-size: 2.4rem;
+    color: white;
+    padding: 1rem 0;
+}
+
+/* Queue info section */
+.queue-info p {
+    font-size: 1.6rem;
+    color: #888;
+    margin-bottom: 1rem;
+}
+
+/* Queue list styling */
+.queue-list {
+    background-color: var(--greyLight-1);
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-radius: 1rem;
+}
+
+.queue-list p {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+#studentList li {
+    font-size: 1.6rem;
+    color: var(--greyDark);
+    list-style-type: none;
+}
+
+#studentList li:nth-child(odd) {
+    color: var(--greyDark);
+}
+
+#studentList li:nth-child(even) {
+    color: var(--greyLight-2);
+}
+
+/* Highlight "YOU" in red */
+#studentList li:nth-child(n) {
+    color: var(--greyDark);
+}
+
+#studentList li:contains("YOU") {
+    color: red;
+    font-weight: bold;
+}

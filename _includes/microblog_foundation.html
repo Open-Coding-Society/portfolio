@@ -92,10 +92,8 @@ window.handleGuestSignup = async function(event) {
     // Step 1: Try to create guest account using Flask backend
     statusMessage.textContent = 'Creating guest account...';
     const signupResponse = await fetch(`${pythonURI}/api/user/guest`, {
+      ...fetchOptions,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(signupData)
     });
 
@@ -110,11 +108,8 @@ window.handleGuestSignup = async function(event) {
 
     // Step 2: Login with the credentials (whether account was just created or already existed)
     const loginResponse = await fetch(`${pythonURI}/authenticate`, {
+      ...fetchOptions,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include',
       body: JSON.stringify(signupData)
     });
 
@@ -237,6 +232,10 @@ document.getElementById('reply-modal').onclick = function(e) {
 // Reply Form Submission
 document.getElementById('reply-form').onsubmit = async function(e) {
   e.preventDefault();
+  const submitButton = this.querySelector('button[type="submit"]');
+  if (submitButton.disabled) return;
+  submitButton.disabled = true;
+  submitButton.textContent = 'Saving...';
   const postId = document.getElementById('reply-post-id').value;
   const content = document.getElementById('reply-content').value;
   const topicPath = pagePermalink || (window.location ? window.location.pathname : 'default');
@@ -247,6 +246,9 @@ document.getElementById('reply-form').onsubmit = async function(e) {
     renderMicroblogTable(); // Refresh to show new reply
   } catch (err) {
     alert('Error posting reply: ' + err.message);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Reply';
   }
 };
 
@@ -307,6 +309,10 @@ function escapeHtml(text) {
 // Save Button Listner for Update and Create
 document.getElementById('microblog-form').onsubmit = async function(e) {
   e.preventDefault();
+  const submitButton = this.querySelector('button[type="submit"]');
+  if (submitButton.disabled) return;
+  submitButton.disabled = true;
+  submitButton.textContent = 'Saving...';
   const id = document.getElementById('post-id').value;
   const topicPath = document.getElementById('topic-id').value;
   const content = document.getElementById('content').value;
@@ -321,6 +327,9 @@ document.getElementById('microblog-form').onsubmit = async function(e) {
     renderMicroblogTable();
   } catch (err) {
     alert('Error saving post: ' + err.message);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Save';
   }
 };
 

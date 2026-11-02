@@ -1,0 +1,94 @@
+.ocs__community-hub-hero,
+.ocs__community-programs-header,
+.ocs__community-volunteer-header {
+  text-align: center;
+}
+
+.ocs__community-hub-hero,
+.ocs__community-programs-header {
+  margin-bottom: 2rem;
+}
+
+.ocs__community-hub-hero .ocs__lead,
+.ocs__community-programs-header .ocs__lead,
+.ocs__community-volunteer-header .ocs__lead {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.ocs__community-stats {
+  margin-top: 1.5rem;
+}
+
+.ocs__community-hub-grid,
+.ocs__community-program-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 1rem;
+}
+
+.ocs__community-hub-card,
+.ocs__community-program-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 0;
+}
+
+.ocs__community-hub-card > .ocs__links,
+.ocs__community-program-card > .ocs__links {
+  margin-top: auto;
+}
+
+.ocs__community-card-tags,
+.ocs__community-filters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.ocs__community-card-tags .ocs__badge {
+  margin-bottom: 0;
+}
+
+.ocs__community-program-controls {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.ocs__community-program-controls .ocs__input {
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.ocs__community-program-card[hidden] {
+  display: none;
+}
+
+.ocs__community-volunteer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.ocs__community-volunteer .ocs__card {
+  margin-bottom: 0;
+}
+
+.ocs__community-volunteer-role-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.ocs__community-volunteer-role-list li + li {
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 600px) {
+  .ocs__community-hub-grid,
+  .ocs__community-program-grid {
+    grid-template-columns: 1fr;
+  }
+}

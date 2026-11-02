@@ -10,7 +10,6 @@
         {% if page.microblog %}
           <div class="micro-actions-wrapper">
             {% include microblog_foundation.html %}
-            {% include inbox_foundation.html %}
           </div>
         {% endif %}
 
@@ -22,7 +21,7 @@
           {% include admin_foundation.html %}
         {% endif %}
 
-        <main class="page-content" aria-label="Content">
+        <main class="page-content{% if page.url contains '/capstone/' or page.permalink contains '/capstone/' or page.categories contains 'Capstone' or page.full_width %} capstone-page{% endif %}" aria-label="Content">
             <div class="wrapper">
                                 <div class="opencs_root">
                                     {{ content }}

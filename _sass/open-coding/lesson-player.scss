@@ -39,6 +39,48 @@ body:has(.lesson-player) {
   border-bottom: 1px solid $bg-3;
 }
 
+.course-pill-nav {
+  margin-bottom: 1.25rem;
+}
+
+.sidebar-header .course-pill-nav,
+.course-mobile-nav .course-pill-nav {
+  gap: 6px;
+
+  .ocs__btn {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+.lesson-sidebar .sidebar-header {
+  padding: 16px 8px;
+}
+
+.course-home {
+  min-width: 0;
+
+  .announcement-chat {
+    width: 100%;
+    max-width: none;
+    margin: 1rem 0;
+  }
+}
+
+.course-panel-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .course-pill-nav {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+  }
+}
+
 .sidebar-header h2 {
   color: $text;
   font-size: 1.25rem;
@@ -99,8 +141,17 @@ body:has(.lesson-player) {
   text-align: left;
 }
 
+/* Hover tints follow the live theme accent. $accent is a static #4CAFEF that
+   is not the same colour as var(--pref-accent-color) and never changes when
+   the reader picks a different accent, so these use the same color-mix idiom
+   his status pills and button utilities use. */
 .sprint-toggle:hover {
-  background: rgba($accent, 0.08);
+  background: color-mix(in srgb, var(--pref-accent-color) 8%, transparent);
+}
+
+.sprint-toggle:focus-visible {
+  outline: 2px solid var(--pref-accent-color);
+  outline-offset: -2px;
 }
 
 .sprint-chevron {
@@ -117,6 +168,7 @@ body:has(.lesson-player) {
 .sprint-title {
   color: var(--pref-accent-color);
   font-size: 14px;
+  font-weight: 700;
   margin-bottom: 2px;
 }
 
@@ -126,7 +178,7 @@ body:has(.lesson-player) {
 }
 
 .lesson-list {
-  margin-left: 24px;
+  margin-left: 12px;
   margin-top: 4px;
 }
 
@@ -146,14 +198,21 @@ body:has(.lesson-player) {
 }
 
 .lesson-item:hover {
-  background: rgba($accent, 0.06);
+  background: color-mix(in srgb, var(--pref-accent-color) 6%, transparent);
 }
 
-.lesson-item.active {
-  background: rgba($accent, 0.1);
+.lesson-item:focus-visible {
+  outline: 2px solid var(--pref-accent-color);
+  outline-offset: -2px;
 }
 
-.lesson-item.active .lesson-title {
+.lesson-item.active,
+.lesson-item.navigation-resume {
+  background: color-mix(in srgb, var(--pref-accent-color) 10%, transparent);
+}
+
+.lesson-item.active .lesson-title,
+.lesson-item.navigation-resume .lesson-title {
   color: $text;
 }
 
@@ -179,11 +238,13 @@ body:has(.lesson-player) {
   color: $text-muted;
   font-size: 14px;
   flex: 1;
+  min-width: 0;
 }
 
 /* MAIN CONTENT AREA */
 .lesson-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -202,6 +263,18 @@ body:has(.lesson-player) {
   margin-bottom: 6px;
 }
 
+/* When the row is tight (an iPad in portrait keeps the 250px sidebar), the
+   crumbs give way so Prev / Next stay side by side instead of stacking.
+   .ocs__links wraps by default, which is what stacked them. */
+.topbar-left {
+  min-width: 0;
+}
+
+.topbar-actions .ocs__links {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
 .breadcrumbs {
   display: flex;
   align-items: center;
@@ -212,6 +285,23 @@ body:has(.lesson-player) {
 
 .breadcrumbs .current {
   color: $text;
+}
+
+/* Keep each crumb whole and let the lesson title truncate; it is repeated as
+   the H1 just below. Burndown lives inside .breadcrumbs, so it must not be
+   the thing that gets squeezed. */
+.breadcrumbs span {
+  white-space: nowrap;
+}
+
+.breadcrumbs .current {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumbs .ocs__btn {
+  flex-shrink: 0;
 }
 
 .topbar-progress {
@@ -349,6 +439,7 @@ body:has(.lesson-player) {
 }
 
 /* Assignment Submission Widget */
+/* Remove these legacy rules:
 .assignment-submission {
   margin-top: 48px;
   padding: 24px;
@@ -364,9 +455,99 @@ body:has(.lesson-player) {
   align-items: center;
   gap: 8px;
 }
+*/
 
 .assignment-submission-icon {
   color: $accent;
+}
+
+/* Self-Assessment */
+.self-assessment {
+  margin-bottom: 24px;
+  padding: 16px 20px;
+  background: $bg-1;
+  border: 1px solid $bg-3;
+  border-radius: 8px;
+}
+
+.self-assessment-title {
+  color: $text;
+  font-size: 1rem;
+  margin: 0 0 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.self-assessment-hint {
+  color: $text-muted;
+  font-size: 13px;
+  margin: 0 0 16px 0;
+}
+
+.rating-group {
+  border: none;
+  padding: 0;
+  margin: 0 0 18px 0;
+}
+
+.rating-label {
+  color: $text;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.rating-question {
+  color: $text-muted;
+  font-size: 13px;
+  margin: 0 0 8px 0;
+}
+
+.rating-scale {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rating-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid $bg-3;
+  border-radius: 6px;
+  background: $bg-0;
+  color: $text;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rating-option:has(input:checked),
+.rating-option.selected {
+  background: $accent;
+  color: $bg-0;
+  border-color: $accent;
+}
+
+.rating-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.rating-scale-hint {
+  color: $text-muted;
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.self-assessment-reflection {
+  margin-bottom: 0;
 }
 
 .submission-options {
@@ -550,6 +731,32 @@ body:has(.lesson-player) {
   color: #ef4444;
 }
 
+.submission-status.loading {
+  display: block;
+  background: color-mix(in srgb, var(--pref-accent-color) 10%, transparent);
+  border: 1px solid var(--pref-accent-color);
+  color: $text;
+}
+
+.code-runner-summary {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  font-size: 0.9rem;
+}
+
+.code-runner-summary li {
+  padding: 4px 0;
+}
+
+.code-runner-saved {
+  color: var(--pref-success-color, #22c55e);
+}
+
+.code-runner-unsaved {
+  color: #ef4444;
+}
+
 /* Bottom Navigation */
 .lesson-bottom {
   border-top: 1px solid var(--pref-accent-color);
@@ -569,17 +776,25 @@ body:has(.lesson-player) {
   gap: 12px;
 }
 
-/* Floating Menu Button (Mobile) */
-.floating-menu-btn {
+/* Shared touch targets for opening navigation and closing its panel. */
+.mobile-course-menu,
+.lesson-course-menu,
+.timeline-close-btn {
   @include icon-button(20px, 0);
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 56px;
-  height: 56px;
-  background: var(--pref-accent-color); 
-  border-radius: 50%;
-  z-index: 1000;
+  display: flex;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  background: var(--pref-accent-color);
+  border-radius: 8px;
+}
+
+.mobile-course-menu {
+  display: none;
+}
+
+#lesson-sidebar-toggle-wrap {
+  flex-shrink: 0;
 }
 
 /* Timeline Modal - applies to all screen sizes */
@@ -621,9 +836,6 @@ body:has(.lesson-player) {
 }
 
 .timeline-modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid $bg-3;
 }
@@ -632,11 +844,6 @@ body:has(.lesson-player) {
   color: $text;
   margin: 0;
   font-size: 1.5rem;
-}
-
-.timeline-close-btn {
-  @include emphasized-icon-button;
-  font-size: 24px;
 }
 
 .timeline-modal-content {
@@ -709,7 +916,8 @@ body:has(.lesson-player) {
   border-color: var(--pref-accent-color);
 }
 
-.modal-lesson-item.active {
+.modal-lesson-item.active,
+.modal-lesson-item.navigation-resume {
   border-color: var(--pref-accent-color);
 }
 
@@ -770,7 +978,7 @@ body:has(.lesson-player) {
     min-height: 100vh; /* ADD THIS */
   }
 
-  .floating-menu-btn {
+  .mobile-course-menu {
     display: flex;
   }
 
@@ -778,6 +986,14 @@ body:has(.lesson-player) {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
+  }
+
+  /* With align-items: flex-start the crumbs sized to their min-content, and
+     the lesson title still counts at full width there, so the row came out
+     396px wide and pushed Burndown off a 375px screen. Holding it to the
+     column's width is what lets the title truncate. */
+  .topbar-left {
+    width: 100%;
   }
 
   .breadcrumbs {

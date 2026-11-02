@@ -1,0 +1,61 @@
+<div class="container mx-auto px-4 py-8 bg-black/5 backdrop-blur-sm rounded-xl relative">
+  <!-- Pearly glow effect around container -->
+  <div class="absolute -inset-1 bg-gradient-to-r from-indigo-200 via-purple-200 to-pink-200 rounded-xl opacity-40 blur-xl"></div>
+  <div class="relative z-10"> <!-- Wrapper div to ensure content stays above the glow -->
+    <!-- Title and Description -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">{{ page.lxdData.Title }}</h1>
+      <p class="text-xl text-gray-300 max-w-4xl mx-auto">{{ page.lxdData.Description }}</p>
+    </div>
+
+    <!-- Prerequisites Section -->
+    {% if page.lxdData.Prequisites %}
+    <div class="mb-8">
+      <h2 class="text-2xl font-semibold text-white mb-2">Prerequisites</h2>
+      <ul class="flex flex-wrap gap-4 justify-center">
+        {% for prereq in page.lxdData.Prequisites %}
+          <li>
+            {% if prereq.title == "Tools Setup" or prereq.title == "Agile Collaboration" %}
+            <a href="{{ prereq.link }}" class="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition">
+              {{ prereq.title }}
+            </a>
+            {% else %}
+            <a href="{{ prereq.link }}" class="iridescent bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition">
+              {{ prereq.title }}
+            </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- Topics Cards Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-6 mb-12">
+      {% for topic in page.lxdData.Topics %}
+        <div class="bg-gray-800 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group transform hover:-translate-y-2">
+          <!-- Image Section (no Play Overlay) -->
+          <div class="relative h-40 overflow-hidden bg-gradient-to-br from-white via-blue-200 to-blue-500 mb-4">
+            <img src="{{ topic.Image }}" alt="{{ topic.Alt }}" class="w-full h-full object-cover transition-all duration-300 group-hover:scale-110">
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-white mb-1">{{ topic.Title }}</h3>
+            <p class="text-sm text-gray-400 mb-2">{{ topic.Genre }} | Level: {{ topic.Level }}</p>
+            <p class="text-gray-300 text-sm mb-4">{{ topic.Description }}</p>
+            <div class="mb-4">
+              <span class="text-sm font-semibold text-gray-200">Categories:</span>
+              <div class="flex flex-wrap gap-1 mt-1">
+                {% for cat in topic.Categories %}
+                  <span class="bg-blue-900 text-blue-200 text-xs px-2 py-1 rounded-full">{{ cat }}</span>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <a href="{{ topic.Lessons }}" class="bg-gradient-to-r from-white via-blue-200 to-blue-500 flex-1 text-black text-center py-2 rounded-lg font-semibold transition">Lessons</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

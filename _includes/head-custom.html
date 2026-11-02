@@ -12,6 +12,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Open+Sans:wght@400;600&family=Lato:wght@400;700&family=Montserrat:wght@400;600&family=Noto+Sans:wght@400;700&family=Merriweather:wght@400;700&family=Source+Code+Pro:wght@400;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<!-- Font Awesome 6 -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+  referrerpolicy="no-referrer">
 
 {%- if page.codemirror -%}
 <!-- CodeMirror CSS -->
@@ -43,6 +48,10 @@
 	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 {%- endif -%}
 
+{%- if page.socket_io -%}
+  	<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+{%- endif -%}
+
 {%- comment -%}
   Global user preference system
   - CSS and JS are loaded after theme styles so that user-selected
@@ -66,16 +75,19 @@
 </script>
 <!-- OCS Analytics Tracking Script (loaded on every page) -->
 <script src="{{ site.baseurl }}/assets/js/ocs-analytics-tracker.js" defer></script>
-{%- if page.socket_io -%}
-  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
-{%- endif -%}
 <!-- Keyboard Shortcuts (Alt+Shift+key navigation, loaded on every page) -->
 <script>window.baseurl = "{{ site.baseurl }}";</script>
 <script src="{{ site.baseurl }}/assets/js/keyboard-shortcuts.js" defer></script>
+
+<!-- AI A/B Test Engine SDK (passes site.baseurl for asset resolution) -->
+<script src="https://ai-ab-test-engine.vercel.app/sdk.js"
+  data-site-baseurl="{{ site.baseurl }}"
+  data-project-id="cmnfour780000f63gu69kg2v8"></script>
 <script type="importmap">
 {
   "imports": {
-    "@assets/": "{{ site.baseurl }}/assets/"
+    "@assets/": "{{ site.baseurl }}/assets/",
+    "@fortuneFinders/": "{{ site.baseurl }}/assets/js/fortuneFinders/"
   }
 }
 </script>

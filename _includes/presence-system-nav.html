@@ -1,0 +1,6 @@
+{%- assign rp_pages = site.data.presence_system_infograph.Pages -%}
+<nav class="rfid-presence-stage-nav ocs__capstone-nav" aria-label="RFID Presence navigation">
+  {%- for p in rp_pages %}
+  <a href="{{ p.url }}" class="ocs__btn pill{% if page.rp_active == p.key %} accent fill{% endif %}"{% if page.rp_active == p.key %} aria-current="page"{% endif %}>{{ p.tab }}</a>
+  {%- endfor %}
+</nav>

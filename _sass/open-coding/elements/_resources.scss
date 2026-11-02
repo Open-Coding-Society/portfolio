@@ -1,0 +1,77 @@
+.ocs__resources {
+  .ocs__resources-hero {
+    margin-bottom: 2rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border: 1px solid var(--ui-border);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--pref-accent-color) 10%, var(--panel));
+  }
+
+  .ocs__resource-badge {
+    display: inline-flex;
+    margin: 0.25rem 0.4rem 0.25rem 0;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--ui-border);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--pref-text-color);
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+
+  .ocs__resources-title {
+    margin: 0.75rem 0;
+    color: var(--pref-text-color);
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.1;
+  }
+
+  .ocs__resources-lead {
+    max-width: 720px;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+
+  .ocs__resources-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1rem;
+  }
+
+  .ocs__resources-section {
+    margin-top: 2rem;
+  }
+
+  .ocs__resources-section-title {
+    margin: 0 0 1rem;
+    color: var(--pref-text-color);
+    font-size: clamp(1.35rem, 3vw, 1.8rem);
+  }
+
+  .ocs__resource-card {
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+
+  .ocs__resource-card h3 {
+    margin-top: 0;
+  }
+
+  .ocs__resource-card .ocs__card-description {
+    line-height: 1.6;
+  }
+
+  .ocs__resource-card .ocs__card-treatment {
+    margin-top: 1rem;
+  }
+
+  .ocs__resource-card .ocs__btn {
+    align-self: flex-start;
+  }
+}

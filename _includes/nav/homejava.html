@@ -31,9 +31,9 @@
                     loginLink.style.display = 'none';
 
                     // Display Toolkits"
-                    calendarLink.innerHTML = `<a href="{{site.baseurl}}/portfolio/calendar">Calendar</a>`;
+                    calendarLink.innerHTML = `<a href="{{site.baseurl}}/student/calendar">Calendar</a>`;
                     profileLink.innerHTML = `<a href="{{site.baseurl}}/profile">Profile</a>`;
-                    studentToolkitLink.innerHTML = `<a href="{{site.baseurl}}/portfolio">Student Toolkit</a>`;
+                    studentToolkitLink.innerHTML = `<a href="{{site.baseurl}}/student">Student Toolkit</a>`;
                     // Check for teacher role to display "Teacher Toolkit"
                     const isTeacher = data.roles.some(role => role.name === 'ROLE_TEACHER');
                     if (isTeacher) {
@@ -45,7 +45,7 @@
                 } else {
                     // User is not authenticated, show signup and login links
                     signupLink.innerHTML = `<a href="{{site.baseurl}}/signup">Signup for Toolkit</a>`;
-                    loginLink.innerHTML = `<a href="{{site.baseurl}}login">Login to Toolkit</a>`;
+                    loginLink.innerHTML = `<a href="{{site.baseurl}}/login">Login to Toolkit</a>`;
 
                     // Hide other links
                     calendarLink.style.display = 'none';
@@ -81,3 +81,9 @@
             });
     }
 </script>
+
+<!-- keyboard shortcuts -->
+<script>
+    window.baseurl = "{{ site.baseurl }}";
+</script>
+<script src="{{ site.baseurl }}/assets/js/keyboard-shortcuts.js"></script>

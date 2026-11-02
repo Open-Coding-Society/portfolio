@@ -10,11 +10,15 @@
 
 # === NESTED STRUCTURE (organized by category) ===
 # Games
-games/castle-game:dev
-games/gamify:dev
+games/castle-game
+games/gamify
 games/red-riding
 
 # Systems
-# Exaample: systems/student-management-groups
+systems/blogs:dev
+systems/calendar
+systems/messages:dev
+systems/profile:dev
+systems/topics:dev
 
 # === FLAT STRUCTURE (legacy/uncategorized) ===

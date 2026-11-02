@@ -1,0 +1,93 @@
+.ocs__volunteer-signup {
+  margin-top: 2rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid var(--ui-border);
+  border-radius: 1rem;
+  background: var(--panel);
+  color: var(--pref-text-color);
+
+  h3 {
+    margin-top: 0;
+    color: var(--pref-text-color);
+  }
+
+  > p {
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+}
+
+.ocs__volunteer-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.ocs__volunteer-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.4rem;
+
+  label {
+    color: var(--pref-text-color);
+    font-weight: 600;
+  }
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--ui-border);
+    border-radius: 0.5rem;
+    background: var(--ui-bg);
+    color: var(--pref-text-color);
+    font: inherit;
+  }
+
+  textarea {
+    min-height: 7rem;
+    resize: vertical;
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--pref-accent-color);
+    outline-offset: 2px;
+  }
+}
+
+.ocs__volunteer-field--wide {
+  grid-column: 1 / -1;
+}
+
+.ocs__volunteer-optional {
+  color: var(--text-muted);
+  font-size: 0.85em;
+  font-weight: 400;
+}
+
+.ocs__volunteer-status {
+  margin: 1rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.ocs__volunteer-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 600px) {
+  .ocs__volunteer-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ocs__volunteer-field--wide {
+    grid-column: auto;
+  }
+}
