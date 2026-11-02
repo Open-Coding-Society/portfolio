@@ -30,3 +30,81 @@
   color: var(--pref-accent-color);
   text-decoration: underline;
 }
+
+.ocs__profile-page {
+  --panel: #fff;
+  --panel-mid: #f4effa;
+  --ui-bg: #f8f5fc;
+  --ui-border: #e6deef;
+  --pref-bg-color: #fff;
+  --pref-text-color: #382e47;
+  --text-muted: #70677c;
+  color: #382e47;
+}
+
+.ocs__profile-page .ocs__card,
+.ocs__profile-page .ocs__modal-card,
+.ocs__profile-page .gist-connection,
+.ocs__profile-page .ocs__image-frame {
+  background: #fff !important;
+  color: #382e47 !important;
+  border-color: #e6deef !important;
+}
+
+.ocs__profile-page .ocs__input,
+.ocs__profile-page input:not([type="radio"]):not([type="range"]):not([type="checkbox"]),
+.ocs__profile-page select,
+.ocs__profile-page textarea {
+  background: #fff !important;
+  color: #382e47 !important;
+  border-color: #d7c8e8 !important;
+}
+
+.ocs__profile-page .ocs__section-title,
+.ocs__profile-page .ocs__label,
+.ocs__profile-page .ocs__text,
+.ocs__profile-page .ocs__card small {
+  color: #503774 !important;
+}
+
+.ocs__profile-page .ocs__profile-wellbeing {
+  background: #fff !important;
+}
+
+.ocs__profile-wellbeing .ocs__field {
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #e6deef;
+  border-radius: 0.75rem;
+  background: #fbf9fd;
+}
+
+.ocs__profile-wellbeing input[type="radio"] {
+  accent-color: #8056a3;
+}
+
+body.page-profile .lesson-sidebar {
+  border-color: #e6deef !important;
+  background: #fff !important;
+  color: #503774 !important;
+}
+
+body.page-profile .lesson-sidebar .nav-item,
+body.page-profile .lesson-sidebar .nav-item.text-neutral-600 {
+  border-left-color: transparent !important;
+  background: #fff !important;
+  color: #604184 !important;
+}
+
+body.page-profile .lesson-sidebar .nav-item:hover,
+body.page-profile .lesson-sidebar .nav-item:focus-visible {
+  border-left-color: #7653a2 !important;
+  background: #f7f1fb !important;
+  color: #503774 !important;
+}
+
+body.page-profile .lesson-sidebar .nav-item.bg-neutral-700 {
+  border-left-color: #7653a2 !important;
+  background: #f0e8f7 !important;
+  color: #503774 !important;
+}

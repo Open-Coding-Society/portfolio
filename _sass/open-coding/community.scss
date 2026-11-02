@@ -345,6 +345,14 @@
     grid-template-columns: 1fr;
   }
 
+  .ocs__teen-resources-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .ocs__teen-resources-hero > img {
+    max-height: 14rem;
+  }
+
   .ocs__community-hub-hero {
     border-bottom-right-radius: 1.25rem;
   }
@@ -410,6 +418,31 @@
   color: var(--mgb-muted) !important;
   font-size: 0.98rem;
   line-height: 1.65;
+}
+
+.ocs__community-programs-image,
+.ocs__community-volunteer-image {
+  margin: 0 0 1.75rem;
+  overflow: hidden;
+  border: 1px solid var(--mgb-border);
+  border-radius: 0.8rem;
+  background: #fff;
+}
+
+.ocs__community-programs-image img,
+.ocs__community-volunteer-image img {
+  display: block;
+  width: 100%;
+  max-height: 22rem;
+  object-fit: cover;
+  object-position: center 45%;
+}
+
+.ocs__community-programs-image figcaption,
+.ocs__community-volunteer-image figcaption {
+  padding: 0.7rem 1rem;
+  color: var(--mgb-muted);
+  font-size: 0.88rem;
 }
 
 .ocs__community-program-controls.ocs__card,
@@ -656,6 +689,18 @@
   box-shadow: 0 8px 20px rgba(80, 55, 116, 0.045);
 }
 
+.ocs__events-note > img {
+  width: clamp(9rem, 20vw, 15rem);
+  min-height: 9rem;
+  flex: 0 0 auto;
+  border-radius: 0.55rem;
+  object-fit: cover;
+}
+
+.ocs__events-note > div {
+  flex: 1;
+}
+
 .ocs__events-note h2 {
   margin: 0 0 0.4rem;
   color: var(--mgb-ink);
@@ -882,6 +927,56 @@
   text-underline-offset: 0.2em;
 }
 
+.ocs__teen-resources-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: clamp(1.25rem, 4vw, 3rem);
+
+  > img {
+    display: block;
+    width: 100%;
+    max-height: 20rem;
+    border-radius: 0.75rem;
+    object-fit: cover;
+    background: #f3edf7;
+  }
+}
+
+.ocs__teen-resources .ocs__resource-topic-links article {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid #e8dfec;
+  border-top: 3px solid #b78bb0;
+  border-radius: 0.65rem;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(80, 55, 116, 0.045);
+
+  strong {
+    color: #604184;
+    font-family: 'Lora', Georgia, serif;
+    font-size: 1.08rem;
+  }
+
+  span {
+    color: #716779;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  a {
+    color: #604184;
+    font-weight: 700;
+    text-underline-offset: 0.2em;
+  }
+}
+
+.ocs__teen-support {
+  margin-top: 2.5rem;
+}
+
 .ocs__login-intro {
   max-width: 46rem;
   margin: 0 auto 2rem;
@@ -994,5 +1089,10 @@
   .ocs__events-note {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .ocs__events-note > img {
+    width: 100%;
+    max-height: 13rem;
   }
 }

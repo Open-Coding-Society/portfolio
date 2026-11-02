@@ -13,6 +13,7 @@ hide_title: true
 	</header>
 
 	<section class="ocs__events-note" aria-labelledby="events-note-title">
+		<img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/90ab2abe-a907-4e62-bd39-8c2b770fcd45/AdobeStock_671974002.jpeg?format=900w" alt="Caregiver and child making art together" loading="lazy">
 		<div>
 			<p class="ocs__community-eyebrow">Make something together</p>
 			<h2 id="events-note-title">Art can bring a community closer.</h2>

@@ -13,6 +13,21 @@ hide_title: true
     <a class="ocs__resources-hero-link" href="https://www.mygoodbrain.org/resources" target="_blank" rel="noopener noreferrer">Browse Motivation Monday on My Good Brain <span aria-hidden="true">&rarr;</span></a>
   </header>
 
+  <section class="ocs__resources-photo-row" aria-label="My Good Brain community">
+    <figure>
+      <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1666223438390-GLS0B445G5S4K4B9PRRE/IMG_7229.jpg?format=750w" alt="My Good Brain resource bags prepared for a Tool Kit program" loading="lazy">
+      <figcaption>Make space to create</figcaption>
+    </figure>
+    <figure>
+      <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1705815763647-XE2B4DZZTDB8CV50HZQJ/IMG_4155.jpg?format=750w" alt="Photo from My Good Brain's Winter 2024 Tool Kit Program" loading="lazy">
+      <figcaption>Grow through connection</figcaption>
+    </figure>
+    <figure>
+      <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1687032627212-PZCECY1687ZE2S42M8XJ/IMG_8787.jpg?format=750w" alt="Photo from My Good Brain's Spring Tool Kit delivery" loading="lazy">
+      <figcaption>Find support together</figcaption>
+    </figure>
+  </section>
+
   <section class="ocs__resources-overview" aria-label="Ways to explore">
     <p><strong>Feel &amp; reflect</strong><span>Activities that make emotions easier to explore.</span></p>
     <p><strong>Create &amp; cope</strong><span>Art-based ideas for mindfulness and self-expression.</span></p>
@@ -83,6 +98,19 @@ hide_title: true
           <li><a href="https://www.mygoodbrain.org/enrichment" target="_blank" rel="noopener noreferrer">Homeschool and enrichment information <span>For families and teachers</span></a></li>
           <li><a href="https://www.mygoodbrain.org/events" target="_blank" rel="noopener noreferrer">My Good Brain events <span>Official event updates</span></a></li>
           <li><a href="mailto:hello@mygoodbrain.org">Contact My Good Brain <span>hello@mygoodbrain.org</span></a></li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="ocs__resource-accordion">
+      <summary><span>06</span><span><strong>Teen mental health &amp; support</strong><small>Teen-focused stories, coping ideas, and places to reach out</small></span></summary>
+      <div class="ocs__resource-accordion-content">
+        <p>Explore My Good Brain stories about burnout, belonging, and self-kindness, alongside trusted crisis support options.</p>
+        <p><a class="ocs__resource-topic-link" href="{{ '/resources/teens/' | relative_url }}">Explore teen mental health resources <span aria-hidden="true">&rarr;</span></a></p>
+        <ul>
+          <li><a href="https://www.mygoodbrain.org/blog/burnt-out-to-back-on-track" target="_blank" rel="noopener noreferrer">From Burnt Out to Back on Track <span>Student perspective</span></a></li>
+          <li><a href="https://www.mygoodbrain.org/blog/teen-blog-fitting-in-true-belonging" target="_blank" rel="noopener noreferrer">Fitting in and true belonging <span>Friendship and identity</span></a></li>
+          <li><a href="https://988lifeline.org/" target="_blank" rel="noopener noreferrer">Call or text 988 <span>Free, confidential crisis support in the U.S.</span></a></li>
         </ul>
       </div>
     </details>

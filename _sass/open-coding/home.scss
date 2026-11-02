@@ -321,6 +321,21 @@
   border-top: 1px solid #d8cbdc;
 }
 
+.ocs__mgb-home-news-image {
+  width: 100%;
+  margin: 0 0 1rem;
+  overflow: hidden;
+  border-radius: 0.35rem;
+}
+
+.ocs__mgb-home-news-image img {
+  display: block;
+  width: 100%;
+  height: clamp(10rem, 19vw, 15rem);
+  object-fit: cover;
+  object-position: center;
+}
+
 .ocs__mgb-home-news-card time {
   margin-bottom: 0.65rem;
   color: #a75473;

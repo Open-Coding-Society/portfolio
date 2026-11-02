@@ -82,7 +82,8 @@ export function login(options) {
     })
     .catch(error => {
         // Handle network errors
-        console.log('Possible CORS or Service Down error: ' + error);
-        document.getElementById(options.message).textContent = 'Possible CORS or service down error: ' + error;
+        console.error('Could not reach the Flask sign-in API:', error);
+        document.getElementById(options.message).textContent =
+            'Could not reach the sign-in service. On localhost, start the Flask API on port 8587. If it is running, check that its CORS settings allow this site.';
     });
 }

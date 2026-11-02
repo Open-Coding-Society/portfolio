@@ -9,6 +9,7 @@ import { initClasses } from './profile-classes.js';
 import { initFaceRegistration } from './profile-face.js';
 import { initPersonas } from './profile-personas.js';
 import { initSkillCheckIn } from './profile-skills.js';
+import { initWellbeingCheckin } from './profile-checkin.js';
 import { initialsOf, setupSteps } from './profile-model.js';
 
 const byId = id => document.getElementById(id);
@@ -111,6 +112,11 @@ export function initProfilePage(api) {
         form: byId('skillSnapshotForm'),
         project: byId('snapshotProjectName'),
         status: byId('snapshotStatus'),
+    });
+
+    initWellbeingCheckin({
+        form: byId('wellbeingCheckinForm'),
+        result: byId('wellbeingCheckinResult'),
     });
 
     // Face ID and the Gist connection are saved in Spring.

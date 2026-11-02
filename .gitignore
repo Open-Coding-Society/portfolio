@@ -76,3 +76,4 @@ _notebooks/**/*_content.md
 # remove all the .scss cache files
 *.scssc
 .notebook-conversion-cache/
+.project-distribution-cache/

@@ -70,7 +70,7 @@ permalink: /
 
       <article class="ocs__mgb-home-program-card">
         <figure class="ocs__mgb-home-card-image">
-          <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1611019132692-E4RRSMUQA66YQ7FPSBGV/AdobeStock_277896487.jpeg?format=750w" alt="A group of school-aged children sitting together in a classroom" loading="lazy">
+          <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1773180586469-4EBY4RXTNIE56GQ9QB6B/unsplash-image-fXkoHG4dYxA.jpg?format=750w" alt="A multigenerational family gathered together outdoors" loading="lazy">
         </figure>
         <div class="ocs__mgb-home-program-copy">
           <p class="ocs__mgb-home-label">Family support</p>
@@ -93,6 +93,7 @@ permalink: /
 
     <div class="ocs__mgb-home-news">
       <article class="ocs__mgb-home-news-card">
+        <figure class="ocs__mgb-home-news-image"><img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1789183497705-H88YY7UDSZ3JZURSZQ56/unsplash-image-QJ3g4T8Cxu4.jpg?format=750w" alt="Photo accompanying My Good Brain's article about comfort objects" loading="lazy"></figure>
         <time datetime="2026-09-11">September 11, 2026</time>
         <h3>Why Comfort Objects Help Kids Through Transitions</h3>
         <p>Small objects can help ease children into new experiences by offering a sense of safety and resilience.</p>
@@ -100,12 +101,14 @@ permalink: /
       </article>
 
       <article class="ocs__mgb-home-news-card">
+        <figure class="ocs__mgb-home-news-image"><img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1721771575709-74GK5689CXHT255B85JK/unsplash-image-tmJ-5p72vaQ.jpg?format=750w" alt="Photo from My Good Brain's community workshop page" loading="lazy"></figure>
         <time datetime="2026-07-14">July 14, 2026</time>
         <h3>How Perfect is Perfect?</h3>
         <a class="ocs__mgb-home-link" href="https://www.mygoodbrain.org/blog/how-perfect-is-perfect" target="_blank" rel="noopener noreferrer">Read the story <span aria-hidden="true">&rarr;</span></a>
       </article>
 
       <article class="ocs__mgb-home-news-card">
+        <figure class="ocs__mgb-home-news-image"><img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1713043146556-X6WIW8W7Z0U976EH9H89/IMG_5733.jpg?format=750w" alt="My Good Brain's Spring 2024 Tool Kit Program" loading="lazy"></figure>
         <time datetime="2026-07-08">July 8, 2026</time>
         <h3>From Burnt Out to Back on Track</h3>
         <p>Riya shares her experience navigating burnout and getting back on track as a high school student, one small step at a time.</p>
@@ -113,6 +116,7 @@ permalink: /
       </article>
 
       <article class="ocs__mgb-home-news-card">
+        <figure class="ocs__mgb-home-news-image"><img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1695191759158-711M6ZJQDBRZN8Y9UTGQ/IMG_2405.jpg?format=750w" alt="My Good Brain's 2023 Fall Tool Kit Program" loading="lazy"></figure>
         <time datetime="2026-04-27">April 27, 2026</time>
         <h3>The “Fitting In” Trap vs. True Belonging</h3>
         <p>Understanding the difference between fitting in and truly belonging can help us build stronger connections.</p>

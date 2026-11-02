@@ -9,8 +9,8 @@ hide_title: true
   <section class="ocs__mgb-about-hero" aria-labelledby="mgb-about-title">
     <img
       class="ocs__mgb-about-image"
-      src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1611019132692-E4RRSMUQA66YQ7FPSBGV/AdobeStock_277896487.jpeg?format=1200w"
-      alt="Children sharing a joyful moment together in a classroom">
+      src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1623801144079-HJ8KARHZ4NPZ97EVI4A8/unsplash-image-1HHvdXH6rqY.jpg?format=1200w"
+      alt="Children smiling together during a My Good Brain program">
     <div class="ocs__mgb-about-intro">
       <p class="ocs__mgb-home-eyebrow">A little about us</p>
       <h1 id="mgb-about-title">Art can help young people find their own way forward.</h1>

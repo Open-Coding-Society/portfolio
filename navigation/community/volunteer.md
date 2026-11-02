@@ -11,6 +11,10 @@ hide_title: true
     <h1>Volunteer with MGB</h1>
     <p class="ocs__lead">Help make art, emotional wellness, and supportive community experiences more accessible to young people and families.</p>
   </header>
+  <figure class="ocs__community-volunteer-image">
+    <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1727764703335-582FIYP32FH3MINZSYV9/IMG_8361.jpeg?format=1200w" alt="Six young women gathered around a table with folders and paper bags" loading="lazy">
+    <figcaption>My Good Brain volunteers prepare materials for community programs.</figcaption>
+  </figure>
 
   <section class="ocs__card" aria-labelledby="teen-volunteer">
     <h2 id="teen-volunteer">San Diego Teens – Volunteer for Teen Creative Arts!</h2>

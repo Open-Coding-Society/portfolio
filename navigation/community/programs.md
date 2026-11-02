@@ -12,6 +12,10 @@ show_reading_time: false
     <h1>Community Programs</h1>
     <p class="ocs__lead">Explore My Good Brain programs, workshops, and resources that bring art, play, and emotional wellness into community life.</p>
   </header>
+  <figure class="ocs__community-programs-image">
+    <img src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1721771575709-74GK5689CXHT255B85JK/unsplash-image-tmJ-5p72vaQ.jpg?format=1600w" alt="Photo from My Good Brain's art and mental wellness workshops" loading="lazy">
+    <figcaption>Creative moments can help make room for connection and conversation.</figcaption>
+  </figure>
 
   <section class="ocs__card ocs__community-program-controls" aria-label="Find a program">
     <div class="ocs__field">

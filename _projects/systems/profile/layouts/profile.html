@@ -18,7 +18,7 @@ Gist card need Spring, so a Flask-only site (spring: false in _config.yml) leave
 {%- endfor -%}]
 </script>
 
-<div class="ocs__container">
+<div class="ocs__container ocs__profile-page">
 
     <!-- Who the student is, and what is left to set up -->
     <section class="ocs__card" aria-labelledby="profileName">
@@ -148,6 +148,42 @@ Gist card need Spring, so a Flask-only site (spring: false in _config.yml) leave
                 <button type="submit" class="ocs__btn accent fill">Save check-in</button>
                 <p class="ocs__text" id="snapshotStatus" role="status"></p>
             </div>
+        </form>
+    </section>
+
+    <section class="ocs__card ocs__profile-wellbeing" aria-labelledby="wellbeingCheckinTitle">
+        <div class="ocs__card-header">
+            <h2 class="ocs__section-title" id="wellbeingCheckinTitle">A quick wellbeing check-in</h2>
+        </div>
+        <form class="ocs__stack" id="wellbeingCheckinForm">
+            <p class="ocs__text">A few optional questions to help you pause and reflect. This is not a diagnosis or a test.</p>
+            <fieldset class="ocs__field">
+                <legend class="ocs__label">How are things feeling for you right now?</legend>
+                <label class="ocs__text"><input type="radio" name="feeling" value="Mostly okay" required> Mostly okay</label>
+                <label class="ocs__text"><input type="radio" name="feeling" value="A little stressed"> A little stressed</label>
+                <label class="ocs__text"><input type="radio" name="feeling" value="Low or tired"> Low or tired</label>
+                <label class="ocs__text"><input type="radio" name="feeling" value="Not sure yet"> Not sure yet</label>
+            </fieldset>
+            <fieldset class="ocs__field">
+                <legend class="ocs__label">What usually helps you reset?</legend>
+                <label class="ocs__text"><input type="radio" name="reset" value="A quiet moment" required> A quiet moment</label>
+                <label class="ocs__text"><input type="radio" name="reset" value="Making or enjoying art or music"> Making or enjoying art or music</label>
+                <label class="ocs__text"><input type="radio" name="reset" value="Moving around"> Moving around</label>
+                <label class="ocs__text"><input type="radio" name="reset" value="Talking with someone I trust"> Talking with someone I trust</label>
+            </fieldset>
+            <fieldset class="ocs__field">
+                <legend class="ocs__label">What would you like a little more of today?</legend>
+                <label class="ocs__text"><input type="radio" name="more" value="Rest" required> Rest</label>
+                <label class="ocs__text"><input type="radio" name="more" value="Encouragement"> Encouragement</label>
+                <label class="ocs__text"><input type="radio" name="more" value="Connection"> Connection</label>
+                <label class="ocs__text"><input type="radio" name="more" value="Help with a task"> Help with a task</label>
+            </fieldset>
+            <div class="ocs__links">
+                <button type="submit" class="ocs__btn accent fill">See my reflection</button>
+                <button type="reset" class="ocs__btn">Start over</button>
+            </div>
+            <p class="ocs__text" id="wellbeingCheckinResult" role="status" aria-live="polite"></p>
+            <p class="ocs__text">Your answers are not saved or sent anywhere by this check-in. If you need support, consider talking with someone you trust.</p>
         </form>
     </section>
 

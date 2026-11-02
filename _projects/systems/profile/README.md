@@ -1,7 +1,7 @@
 # Profile
 
 Profile is the student's settings page at `/profile`: who they are, their account
-details, classes, persona, skill check-in, Face ID and GitHub Gist connection. It
+details, classes, persona, skill check-in, optional wellbeing reflection, Face ID and GitHub Gist connection. It
 is built only from the OCS grammar (`_sass/open-coding/elements/`, documented in
 `_sass/open-coding/README.md`) and has no page stylesheet.
 
@@ -38,6 +38,7 @@ What Profile does in each:
 | Account Save | each changed field to Flask (`PUT /api/user`) | to Flask and to Spring (`POST /api/person/update`) |
 | Classes | saved in Flask | saved in Flask, then Spring's course groups updated |
 | Persona and Skill check-in | saved in Flask | saved in Flask |
+| Wellbeing reflection | stays in the browser | stays in the browser |
 | Face ID and GitHub Gist cards | left out | shown; both save in Spring |
 | Optional AI grading connections | left out | Gemini/Groq keys save independently in Spring |
 | Setup list | Classes, Persona | Classes, Persona, Face ID, GitHub |

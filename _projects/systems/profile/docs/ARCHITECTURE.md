@@ -12,8 +12,8 @@ show_reading_time: false
 `/profile` (`pages/profile.md`) uses `layouts/profile.html`, which sits inside the
 toolkit's `aesthetihawk` layout. The layout holds:
 
-- the markup: the top card, then the Account, Classes, Persona, Skill check-in and
-  Face ID cards, then the Gist card include. Face ID and the Gist card are built only
+- the markup: the top card, then the Account, Classes, Persona, Skill check-in,
+  optional wellbeing reflection and Face ID cards, then the Gist card include. Face ID and the Gist card are built only
   when the site runs Spring (`spring` in `_config.yml` isn't `false`).
 - a JSON list of courses, built from each course's `course.title` in
   `_projects/systems/courses/data/<course>.yml` (published to `_data/`)
@@ -35,6 +35,7 @@ and `profile-page.js` doesn't start Face ID or watch the Gist card.
 | `profile-classes.js` | The course list, Add class and Remove | Flask `GET`/`POST /api/user/class`; with Spring, Spring `PUT /api/groups/class-memberships` |
 | `profile-personas.js` | The persona summary and picker cards | Flask `GET /api/persona`, `GET /api/user/personas`, `POST /api/user/persona` |
 | `profile-skills.js` | The skill check-in (four 1–6 ratings) | Flask `POST /api/user/skill-snapshot` |
+| `profile-checkin.js` | The optional three-question wellbeing reflection | none; answers stay in the browser |
 | `profile-face.js` | Face ID status and the camera scanner | Spring `GET /api/person/get`, `POST /api/face/register` |
 | `gist-connection.js` | The Gist card | Spring `GET`/`PUT`/`DELETE /api/gist-connection` |
 | `ai-connections.js` | Optional AI grading card | Spring `GET /api/ai-connections`, `PUT`/`DELETE /api/ai-connections/{gemini\|groq}` |
@@ -48,6 +49,7 @@ Each part saves on its own, so no single Save button covers the whole page:
   high school.
 - Adding or removing a course, picking a persona, saving a check-in, registering
   a face and saving a Gist token each save right away.
+- The optional wellbeing reflection is not persisted or sent to a service.
 - Gemini and Groq keys also save independently, including from Gist and Account saves.
   Their include supplies `javaURI` to the module as `apiBase`; the module never imports
   shared configuration via a parent path. Like Gist, the card and its starter are omitted

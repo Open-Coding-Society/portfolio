@@ -71,6 +71,36 @@
     text-underline-offset: 0.2em;
   }
 
+  .ocs__resources-photo-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0 0 1.5rem;
+
+    figure {
+      min-width: 0;
+      margin: 0;
+      overflow: hidden;
+      border: 1px solid #e8dfec;
+      border-radius: 0.65rem;
+      background: #fff;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      height: clamp(9rem, 17vw, 13rem);
+      object-fit: cover;
+    }
+
+    figcaption {
+      padding: 0.65rem 0.8rem;
+      color: #604184;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+  }
+
   .ocs__resources-overview {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -329,6 +359,14 @@
 
     .ocs__resources-overview {
       grid-template-columns: 1fr;
+    }
+
+    .ocs__resources-photo-row {
+      grid-template-columns: 1fr;
+
+      img {
+        height: 13rem;
+      }
     }
 
     .ocs__resource-accordion-content {
