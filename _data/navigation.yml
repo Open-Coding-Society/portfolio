@@ -18,3 +18,10 @@ resources:
     url: /resources/educators/
   - title: Workshops & enrichment
     url: /resources/workshops/
+blog:
+  - title: General blogs
+    url: https://www.mygoodbrain.org/blog
+    external: true
+  - title: Teen blogs
+    url: https://www.mygoodbrain.org/blog/category/teen%20blog%20corner
+    external: true
