@@ -8,16 +8,14 @@ require_relative "../../../../scripts/publish_project"
 
 class BlogsSystemTest < Minitest::Test
   BLOGS = File.expand_path("..", __dir__)
-  COURSES = File.expand_path("../../courses", __dir__)
+  TOPICS = File.expand_path("../../topics", __dir__)
   ROOT = File.expand_path("../../../..", __dir__)
 
-  def test_blogs_and_courses_have_disjoint_outputs
+  def test_blogs_and_topics_have_disjoint_outputs
     blog_outputs = ProjectPublisher.files(BLOGS, ROOT).map(&:last)
-    course_outputs = ProjectPublisher.files(COURSES, ROOT).map(&:last)
-    assert_empty blog_outputs & course_outputs
+    topics_outputs = ProjectPublisher.files(TOPICS, ROOT).map(&:last)
+    assert_empty blog_outputs & topics_outputs
     assert_includes blog_outputs, File.join(ROOT, "_layouts/post.html")
-    refute_includes course_outputs, File.join(ROOT, "_layouts/post.html")
-    assert_includes course_outputs, File.join(ROOT, "_includes/course-document-player.html")
     assert_includes File.read(File.join(ROOT, "_projects/.makeprojects")), "systems/blogs:dev"
   end
 
@@ -31,9 +29,10 @@ class BlogsSystemTest < Minitest::Test
       ))
       ProjectPublisher.run("publish", old_courses, workspace)
       assert_raises(RuntimeError) { ProjectPublisher.run("publish", BLOGS, workspace) }
-      ProjectPublisher.run("publish", COURSES, workspace)
+      File.write(File.join(old_courses, "distribution.json"), '{"files":[]}')
+      ProjectPublisher.run("publish", old_courses, workspace)
       ProjectPublisher.run("publish", BLOGS, workspace)
-      ProjectPublisher.run("clean", COURSES, workspace)
+      ProjectPublisher.run("clean", old_courses, workspace)
       assert_equal File.read(File.join(BLOGS, "layouts/post.html")),
                    File.read(File.join(workspace, "_layouts/post.html"))
       refute File.exist?(File.join(workspace, "_includes/course-document-player.html"))
@@ -46,6 +45,7 @@ class BlogsSystemTest < Minitest::Test
   def test_standalone_document_and_reader_render_without_courses
     Dir.mktmpdir("blogs-render-") do |source|
       ProjectPublisher.run("publish", BLOGS, source)
+      ProjectPublisher.run("publish", TOPICS, source)
       File.write(File.join(source, "_layouts/opencs.html"), "<main>{{ content }}</main>")
       %w[reading_time.html].each do |name|
         FileUtils.cp(File.join(ROOT, "_includes", name), File.join(source, "_includes"))

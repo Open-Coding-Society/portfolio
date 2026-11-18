@@ -144,7 +144,8 @@
   import { pythonURI, fetchOptions, javaURI } from '{{ site.baseurl }}/assets/js/api/config.js';
   import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
   import { appendGistSettingsLink } from '{{ site.baseurl }}/assets/js/gist-connection-errors.js';
-  import { listRunners, unsavedRunners, readRunners } from '{{ site.baseurl }}/assets/js/runner-io.js';
+  import { readRunnerKinds, readRunners, runnerSelectionSummary } from '{{ site.baseurl }}/assets/js/runner-io.js';
+  import { mountSubmissionSummary, submissionError } from '{{ site.baseurl }}/assets/js/runner-submission.js';
   import { createNavigationState } from '{{ site.baseurl }}/assets/js/course-navigation-state.js';
   import { rememberCourse } from '{{ site.baseurl }}/assets/js/course-entry.js';
 
@@ -673,11 +674,11 @@
     }).catch(() => {}); // non-blocking — don't fail submission if grades write fails
   }
 
-  async function submitCodeToBackend(files, description, selfAssessment) {
+  async function submitCodeToBackend(files, description, selfAssessment, manifest) {
     const assignmentId = await ensureAssignmentId();
     // Resolve the user first so we don't burn a Gist creation on a request that will fail anyway.
     const { uid, personId } = await resolveCurrentUser();
-    const gistUrl = await exportToGist(files, { type: 'submission', description: description || 'Code submission' });
+    const gistUrl = await exportToGist(files, { type: 'submission', description: description || 'Code submission', manifest });
     const content = { type: 'code', url: gistUrl, notes: description };
     const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
       ...fetchOptions,
@@ -926,28 +927,6 @@
 
   /**
    * ============================================
-   * CODE SUBMISSION: Show which runners will be sent
-   * ============================================
-   */
-  function renderCodeRunnerSummary() {
-    const list = document.getElementById('code-runner-summary');
-    if (!list) return;
-    const runners = listRunners();
-    if (runners.length === 0) {
-      list.innerHTML = '<li>No code runners found on this page.</li>';
-      return;
-    }
-    const unsaved = new Set(unsavedRunners());
-    list.innerHTML = runners.map((el, i) => {
-      const id = el.dataset.runnerId || `runner_${i + 1}`;
-      return unsaved.has(el)
-        ? `<li>${id} — <span class="code-runner-unsaved">not saved yet</span></li>`
-        : `<li>${id} — <span class="code-runner-saved">saved</span></li>`;
-    }).join('');
-  }
-
-  /**
-   * ============================================
    * FORM SUBMISSION: Handle submissions
    * ============================================
    */
@@ -1025,20 +1004,18 @@
 
     const codeForm = document.getElementById('code-form');
     if (codeForm) {
-      renderCodeRunnerSummary();
+      mountSubmissionSummary(document.getElementById('code-runner-count'), document.getElementById('code-runner-summary'));
       codeForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         const notes = document.getElementById('code-notes')?.value?.trim() || '';
         const submitBtn = codeForm.querySelector('button[type="submit"]');
-        if (unsavedRunners().length > 0) {
-          showStatus('error', 'Save your code with the 💾 button in each runner before submitting.');
+        const error = submissionError();
+        if (error) {
+          showStatus('error', error);
           return;
         }
-        const files = readRunners();
-        if (Object.keys(files).length === 0) {
-          showStatus('error', "No saved code found in this lesson's code runner(s).");
-          return;
-        }
+        const files = readRunners({ selectedOnly: true });
+        const manifest = { kinds: readRunnerKinds({ selectedOnly: true }), runners: runnerSelectionSummary() };
         const selfAssessment = getSelfAssessmentData();
         // Self-assessment is paused, so its required-field check is off for now.
         // const selfAssessmentError = validateSelfAssessment(selfAssessment);
@@ -1057,7 +1034,7 @@
         }
         showStatus('loading', 'Creating Gist and submitting...');
         try {
-          await submitCodeToBackend(files, notes, selfAssessment);
+          await submitCodeToBackend(files, notes, selfAssessment, manifest);
           saveSubmissionLocally('code', { notes, selfAssessment });
           showStatus('success', 'Code submitted successfully!');
           this.reset();

@@ -3,7 +3,10 @@ layout: profile
 title: Your Profile
 permalink: /profile
 active_tab: profile
+# Rebuilt on every build: the layout reads spring from _config.yml, which incremental
+# builds don't watch.
+regenerate: true
 ---
 
-<!-- page formatting is fetched from the layout -->
-<!-- this is the new profile page -->
+<!-- Published by _projects/systems/profile (distribution.json). The page is built by
+     the system's layouts/profile.html. -->

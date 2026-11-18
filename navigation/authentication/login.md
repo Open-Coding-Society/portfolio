@@ -5,57 +5,10 @@ permalink: /login
 search_exclude: true
 show_reading_time: false
 ---
-<style>
-    .submit-button {
-        width: 100%;
-        transition: all 0.3s ease;
-        position: relative;
-    }
-    .login-container {
-        display: flex;
-        /* Use flexbox for side-by-side layout */
-        justify-content: space-between;
-        /* Add space between the cards */
-        align-items: flex-start;
-        /* Align items to the top */
-        gap: 20px;
-        /* Add spacing between the cards */
-        flex-wrap: nowrap;
-        /* Prevent wrapping of the cards */
-    }
-
-    .login-card,
-    .signup-card {
-        flex: 1 1 calc(50% - 20px);
-        max-width: 45%;
-        box-sizing: border-box;
-        background: #1e1e1e;
-        border-radius: 15px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        padding: 20px;
-        color: white;
-        overflow: hidden;
-    }
-
-    .login-card h1 {
-        margin-bottom: 20px;
-    }
-
-    .signup-card h1 {
-        margin-bottom: 20px;
-    }
-
-    .form-group {
-        position: relative;
-        margin-bottom: 1.5rem;
-    }
-
-    input {
-        width: 100%;
-        box-sizing: border-box;
-    }
-</style>
 <br>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <div class="login-container">
     <!-- Python Login Form -->
     <div class="login-card">
@@ -72,12 +25,68 @@ show_reading_time: false
                 <button type="submit" class="large primary submit-button">Login</button>
             </p>
             <p id="message" style="color: red;"></p>
+            <!-- Shown after login when a student's verification has lapsed -->
+            <div id="reverify" style="display: none; text-align: center;">
+                <h3>School Email Verification</h3>
+                <p>Your verification has lapsed. Sign in with your school Google account to continue.</p>
+                <div class="g_id_signin"
+                     data-type="standard"
+                     data-size="large"
+                     data-theme="filled_blue"
+                     data-text="signin_with"
+                     data-shape="rectangular"
+                     data-logo_alignment="left"></div>
+                <p id="reverify-status"></p>
+            </div>
+            <p style="text-align: center;">
+                <a href="{{site.baseurl}}/support?topic=reset">Forgot your password?</a>
+            </p>
         </form>
     </div>
     <div class="signup-card">
         <h1 id="signupTitle">Sign Up</h1>
         <hr>
-        <form id="signupForm" onsubmit="signup(); return false;">
+        <!-- Google OAuth Section (initially hidden) -->
+        <div id="oauth-verification" style="display: none; text-align: center; margin-bottom: 2rem;">
+            <h3 style="color: #6366f1; margin-bottom: 1rem;">🎓 School Email Verification</h3>
+            <p style="margin-bottom: 1.5rem; color: #d1d5db;">
+                Please sign in with your school Google account to verify you're a Poway USD student or teacher.
+                <br><strong>You must use an email ending in @stu.powayusd.com or @powayusd.com</strong>
+            </p>
+            <div id="g_id_onload"
+                 data-client_id="{{ site.google_client_id }}"
+                 data-callback="handleGoogleSignIn"
+                 data-auto_prompt="false">
+            </div>
+            <div class="g_id_signin" 
+                 data-type="standard"
+                 data-size="large"
+                 data-theme="filled_blue"
+                 data-text="signin_with"
+                 data-shape="rectangular"
+                 data-logo_alignment="left"
+                 style="margin-bottom: 1rem;">
+            </div>
+            <button type="button" class="large secondary" onclick="showSignupForm()" 
+                    style="background-color: #6b7280;">
+                ← Back to Form
+            </button>
+            <div id="oauth-status" style="margin-top: 1rem;"></div>
+        </div>
+        <!-- Signup Form -->
+        <form id="signupForm" onsubmit="handleSignupSubmit(event);">
+            <div class="form-group">
+                <select id="signupRole">
+                    <option value="student" selected>I am a Student</option>
+                    <option value="mentor">I am a Mentor</option>
+                    <option value="guest" id="guestOption" hidden disabled>I am a guest</option>
+                </select>
+                <p id="guest-note" hidden>
+                    A guest can view pages, comment on the microblog and react to posts. It needs no GitHub or school
+                    account, and it lasts only a few hours. Guest sign-up is open until <span id="guest-closes"></span>:
+                    log in with the same account during a later guest window to come back.
+                </p>
+            </div>
             <div class="form-group">
                 <input type="text" id="name" placeholder="Name" required>
             </div>
@@ -88,244 +97,63 @@ show_reading_time: false
                 <input type="text" id="signupSid" placeholder="Student ID" required>
             </div>
             <div class="form-group">
-                <input type="text" id="signupEmail" placeholder="Email" required>
+                <select id="signupSchool" required>
+                    <option value="" disabled selected>Select Your High School</option>
+                    <option value="Abraxas High School">Abraxas</option>
+                    <option value="Del Norte High School">Del Norte</option>
+                    <option value="Mt Carmel High School">Mt Carmel</option>
+                    <option value="Poway High School">Poway</option>
+                    <option value="Poway to Palomar">Poway to Palomar</option>
+                    <option value="Rancho Bernardo High School">Rancho Bernardo</option>
+                    <option value="Westview High School">Westview</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="email" id="signupEmail" placeholder="Personal (not school) Email" required>
             </div>
             <div class="form-group">
                 <input type="password" id="signupPassword" placeholder="Password" required>
             </div>
-            <p>
-                <label class="switch">
-                    <span class="toggle">
-                        <input type="checkbox" name="kasmNeeded" id="kasmNeeded">
-                        <span class="slider"></span>
-                    </span>
-                    <span class="label-text">Kasm Server Needed</span>
-                </label>
-
-            </p>
+            <!-- Confirm Password Field -->
+            <div class="form-group">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <div id="password-validation-message" class="validation-message"></div>
+            </div>
             <p>
                 <button type="submit" class="large primary submit-button">Sign Up</button>
             </p>
-            <p id="signupMessage" style="color: green;"></p>
+            <!-- Backend Status Display -->
+            <div class="backend-status">
+                <div id="flaskStatus" class="status-item">
+                    <span class="status-icon">⏳</span>
+                    <span class="status-text">Flask</span>
+                </div>
+                <div id="springStatus" class="status-item">
+                    <span class="status-icon">⏳</span>
+                    <span class="status-text">Spring</span>
+                </div>
+            </div>
+            <div id="overallStatus" class="overall-status hidden"></div>
         </form>
     </div>
 </div>
+
 <script type="module">
-    import { login, pythonURI, javaURI, fetchOptions } from '{{site.baseurl}}/assets/js/api/config.js';
-    // Function to handle both Python and Java login simultaneously
-    window.loginBoth = function () {
-    javaLogin();  // Call Java login
-    pythonLogin();
-};
-    // Function to handle Python login
-    window.pythonLogin = function () {
-        const options = {
-            URL: `${pythonURI}/api/authenticate`,
-            callback: pythonDatabase,
-            message: "message",
-            method: "POST",
-            cache: "no-cache",
-            body: {
-                uid: document.getElementById("uid").value,
-                password: document.getElementById("password").value,
-            }
-        };
-        login(options);
-    }
-    // Function to handle Java login
-    window.javaLogin = function () {
-    const loginURL = `${javaURI}/authenticate`;
-    const databaseURL = `${javaURI}/api/person/get`;
-    const signupURL = `${javaURI}/api/person/create`;
-    const userCredentials = JSON.stringify({
-        uid: document.getElementById("uid").value,
-        password: document.getElementById("password").value,
+    import { baseurl, pythonURI, javaURI, fetchOptions, GOOGLE_CLIENT_ID, springEnabled } from '{{site.baseurl}}/assets/js/api/config.js';
+    import { loginReturnPath } from '{{site.baseurl}}/assets/js/api/login-return.js';
+    import { reverifyNeeded, staffMustVerify, reverify } from '{{site.baseurl}}/assets/js/api/reverify.js';
+    import { SPRING_PASSWORD_RULES, meetsSpringPasswordRules, attachPasswordChecklist } from '{{site.baseurl}}/assets/js/api/passwordRules.js';
+    import { createBackends } from '{{site.baseurl}}/assets/js/login/backend.js';
+    import { createSession } from '{{site.baseurl}}/assets/js/login/session.js';
+    import { startLoginPage } from '{{site.baseurl}}/assets/js/login/login-page.js';
+
+    startLoginPage({
+        session: createSession(createBackends({ pythonURI, javaURI, fetchOptions, springEnabled })),
+        pythonURI, javaURI, fetchOptions, GOOGLE_CLIENT_ID, loginReturnPath,
+        reverifyNeeded, staffMustVerify, reverify,
+        SPRING_PASSWORD_RULES, meetsSpringPasswordRules, attachPasswordChecklist,
+        baseurl,
     });
-    const loginOptions = {
-        ...fetchOptions,
-        method: "POST",
-        body: userCredentials,
-    };
-    console.log("Attempting Java login...");
-    fetch(loginURL, loginOptions)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Invalid login");
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Login successful!", data);
-            window.location.href = '{{site.baseurl}}/profile';
-            // Fetch database after login success using fetchOptions
-            return fetch(databaseURL, fetchOptions);
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`Spring server response: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("Java database response:", data);
-        })
-        .catch(error => {
-            console.error("Login failed:", error.message);
-            // If login fails, attempt account creation
-            if (error.message === "Invalid login") {
-                alert("Login for Spring failed. Creating a new Java account...");
-                const signupData = JSON.stringify({
-                    uid: document.getElementById("uid").value,
-                    email: document.getElementById("uid").value + "@gmail.com",
-                    dob: "11-01-2024", // Static date, can be modified
-                    name: document.getElementById("uid").value,
-                    password: document.getElementById("password").value,
-                    kasmServerNeeded: false,
-                });
-                const signupOptions = {
-                    ...fetchOptions,
-                    method: "POST",
-                    body: signupData,
-                };
-                fetch(signupURL, signupOptions)
-                    .then(signupResponse => {
-                        if (!signupResponse.ok) {
-                            throw new Error("Account creation failed!");
-                        }
-                        return signupResponse.json();
-                    })
-                    .then(signupResult => {
-                        console.log("Account creation successful!", signupResult);
-                        alert("Account Creation Successful. Logging you into Flask/Spring!");
-                        // Retry login after account creation
-                        return fetch(loginURL, loginOptions);
-                    })
-                    .then(newLoginResponse => {
-                        if (!newLoginResponse.ok) {
-                            throw new Error("Login failed after account creation");
-                        }
-                        console.log("Login successful after account creation!");
-                        // Fetch database after successful login
-                        return fetch(databaseURL, fetchOptions);
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`Spring server response: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log("Java database response:", data);
-                    })
-                    .catch(newLoginError => {
-                        console.error("Error after account creation:", newLoginError.message);
-                    });
-            } else {
-                console.log("Logged in!");
-            }
-        });
-};
-    // Function to fetch and display Python data
-    function pythonDatabase() {
-        const URL = `${pythonURI}/api/id`;
-        fetch(URL, fetchOptions)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Flask server response: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                window.location.href = '{{site.baseurl}}/profile';
-            })
-            .catch(error => {
-                document.getElementById("message").textContent = `Error: ${error.message}`;
-            });
-    }
-    window.signup = function () {
-        const signupButton = document.querySelector(".signup-card button");
-        // Disable the button and change its color
-        signupButton.disabled = true;
-        signupButton.classList.add("disabled");
-        const signupOptionsPython = {
-            URL: `${pythonURI}/api/user`,
-            method: "POST",
-            cache: "no-cache",
-            body: {
-                name: document.getElementById("name").value,
-                uid: document.getElementById("signupUid").value,
-                email: document.getElementById("signupEmail").value,
-                password: document.getElementById("signupPassword").value,
-                kasm_server_needed: document.getElementById("kasmNeeded").checked,
-            }
-        };
-        const signupOptionsJava = {
-            URL: `${javaURI}/api/person/create`,
-            method: "POST",
-            cache: "no-cache",
-            headers: new Headers({
-                "Content-Type": "application/json"
-            }),
-            body: JSON.stringify({
-                uid: document.getElementById("signupUid").value,
-                sid: document.getElementById("signupSid").value,
-                email: document.getElementById("signupEmail").value,
-                dob: "11-01-2024",  // Static date for now, you can modify this
-                name: document.getElementById("name").value,
-                password: document.getElementById("signupPassword").value,
-                kasmServerNeeded: document.getElementById("kasmNeeded").checked,
-            })
-        };
-        fetch(signupOptionsJava.URL, signupOptionsJava)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById("signupMessage").innerText = "Sign up successful!";
-                } else {
-                    document.getElementById("signupMessage").innerText = "Sign up failed: " + data.message;
-                }
-            })
-            .catch(error => {
-                document.getElementById("signupMessage").innerText = "Error: " + error.message;
-                console.error('Error during signup:', error);
-            });
-        fetch(signupOptionsPython.URL, {
-            method: signupOptionsPython.method,
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(signupOptionsPython.body)
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Signup failed on one or both backends: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById("signupMessage").textContent = "Signup successful!";
-                // Optionally redirect to login page or handle as needed
-                // window.location.href = '{{site.baseurl}}/profile';
-            })
-            .catch(error => {
-                console.error("Signup Error:", error);
-                document.getElementById("signupMessage").textContent = `Signup Error: ${error.message}`;
-                // Re-enable the button if there is an error
-                signupButton.disabled = false;
-                signupButton.style.backgroundColor = ''; // Reset to default color
-            });
-    }
-    function javaDatabase() {
-        const URL = `${javaURI}/api/person/get`;
-        fetch(URL, fetchOptions)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Spring server response: ${response.status}`);
-                }
-                return response.json();
-            })
-            .catch(error => {
-                console.error("Java Database Error:", error);
-            });
-    }
 </script>
+
+<script type="module" src="{{site.baseurl}}/assets/js/api/passwordFields.js"></script>

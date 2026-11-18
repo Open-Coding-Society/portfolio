@@ -12,7 +12,7 @@
  *   const url = await exportToGist(files, { type: 'submission' });
  */
 
-import { javaURI, baseurl } from '/assets/js/api/config.js';
+import { javaURI, baseurl } from './api/config.js';
 import { gistExportError } from './gist-connection-errors.js';
 
 /** Filename of the manifest describing what an envelope contains. */
@@ -29,6 +29,8 @@ const DEFAULT_DESCRIPTION = 'Exported from Open Coding Society';
  *                                     Written into the manifest so whoever opens
  *                                     it can tell whether it is theirs to handle.
  * @param {string} [opts.description]  human-readable label
+ * @param {Object} [opts.manifest]     extra manifest fields describing the files, e.g.
+ *                                     { kinds: { "a.md": "reflection" } }. Only used with type.
  * @returns {Promise<string>} the URL
  */
 export async function exportToGist(files, opts = {}) {
@@ -42,6 +44,7 @@ export async function exportToGist(files, opts = {}) {
   if (opts.type) {
     payload[MANIFEST] = {
       content: JSON.stringify({
+        ...opts.manifest,
         type: opts.type,
         version: 1,
         source: window.location.pathname,

@@ -10,25 +10,10 @@ the backend endpoints each part calls, and how it's tested.
 
 ## Flask only or Flask + Spring
 
-The OCS kit runs with Flask only or with Flask and Spring, depending on the features
-a site needs. `spring` in `_config.yml` says which:
-
-- `spring: false` is OCS for Business: Flask only, with single login.
-- `spring: true` is OCS for Education: Flask and Spring, with dual login. This site
-  uses it.
-
-Each backend keeps its own account and sign-in. Single login uses Flask alone; dual
-login does each step on Spring too:
-
-| Step | Single login (Flask only) | Dual login (Flask + Spring) |
-|---|---|---|
-| Sign-up | Flask `POST /api/user` | then Spring `POST /api/person/create` |
-| Sign-in | Flask `POST /api/authenticate` | and Spring `POST /authenticate`, at the same time (`loginBoth`) |
-| Logout | Flask `DELETE /api/authenticate` | then Spring `POST /api/logout` |
-
-In dual login, Flask's step must work. If only Spring's step fails, sign-up and sign-in
-still work in Flask, and the login page warns that DMs, calendar and announcements
-won't; at sign-in it also offers Continue anyway.
+The OCS kit runs with Flask only (`spring: false`, OCS for Business, single login) or
+with Flask and Spring (`spring: true`, OCS for Education, dual login). How sign-up,
+sign-in and logout work in each is in the
+[Login README](../login/README.md#flask-only-or-flask--spring).
 
 What Profile does in each:
 
@@ -39,14 +24,8 @@ What Profile does in each:
 | Classes | saved in Flask | saved in Flask, then Spring's course groups updated |
 | Persona and Skill check-in | saved in Flask | saved in Flask |
 | Face ID and GitHub Gist cards | left out | shown; both save in Spring |
-| Optional AI grading connections | left out | Gemini/Groq keys save independently in Spring |
+| Optional AI connections (grading and AI themes) | left out | Gemini/Groq keys save independently in Spring |
 | Setup list | Classes, Persona | Classes, Persona, Face ID, GitHub |
-
-The setting covers Profile, the login page's sign-up and sign-in, logout and the
-navbar's DM bell (its unread count). Other pages that use Spring, such as DMs, the
-calendar and announcements, don't read it, and some links still lead to them:
-Profile's Reset password and Skill Passport, and the toolkit sidebar's View Grades,
-Calendar and Bathroom Pass.
 
 ### Try it
 
@@ -77,7 +56,9 @@ published copies. Edit the sources here.
 The layout's starter script imports the shared helpers (`assets/js/api/config.js`
 and `assets/js/api/profile.js`) with `{{ site.baseurl }}` and passes them to
 `initProfilePage(api)`, `springEnabled` included. The Gist include does the same for
-`javaURI`. The modules import each other only with `./` paths, so moving this folder
+`javaURI`. The AI connections include passes both `javaURI` and shared `fetchOptions`
+from that configuration; requests override only the method, cache (`no-store`) and
+save body. The modules import each other only with `./` paths, so moving this folder
 can't break them. A site that uses Profile needs a `config.js` that exports
 `springEnabled`.
 

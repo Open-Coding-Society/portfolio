@@ -42,8 +42,8 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
 {% include course-document-player.html %}
 {% else %}
 {% if page.topics_context and page.topics_nav_in_content != true %}
-{% include topics-document-nav.html %}
-<script type="module" src="{{ '/assets/js/topics/document.js' | relative_url }}"></script>
+{% include projects/topics/topics-document-nav.html %}
+<script type="module" src="{{ '/assets/js/projects/topics/document.js' | relative_url }}"></script>
 {% endif %}
 {% comment %}
 === REGULAR BLOG POST LAYOUT FOR NON-CSP POSTS ===
@@ -388,6 +388,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
       <form class="submission-form active" id="code-form-blog">
         <div class="form-group">
           <p class="form-hint">This submits the code from this lesson's code runner(s) below as a Gist for automatic review. Save each runner with its 💾 button before submitting.</p>
+          <p id="code-runner-count-blog"></p>
           <ul class="code-runner-summary" id="code-runner-summary-blog"></ul>
         </div>
         <div class="form-group">
@@ -506,20 +507,8 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
       document.addEventListener('DOMContentLoaded', autoCreateAssignmentIfNeededBlog);
 
       function renderCodeRunnerSummaryBlog() {
-        const list = document.getElementById('code-runner-summary-blog');
-        if (!list) return;
-        const runners = window.listRunners();
-        if (runners.length === 0) {
-          list.innerHTML = '<li>No code runners found on this page.</li>';
-          return;
-        }
-        const unsaved = new Set(window.unsavedRunners());
-        list.innerHTML = runners.map((el, i) => {
-          const id = el.dataset.runnerId || `runner_${i + 1}`;
-          return unsaved.has(el)
-            ? `<li>${id} — <span class="code-runner-unsaved">not saved yet</span></li>`
-            : `<li>${id} — <span class="code-runner-saved">saved</span></li>`;
-        }).join('');
+        window.mountSubmissionSummary(document.getElementById('code-runner-count-blog'),
+          document.getElementById('code-runner-summary-blog'));
       }
 
       async function ensureAssignmentIdBlog() {
@@ -867,7 +856,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
       // Code submission — bundled into a Gist, then POST to Spring API
       const codeFormBlog = document.getElementById('code-form-blog');
       if (codeFormBlog) {
-        // window.listRunners/etc. come from a module script further down the page, which
+        // The submission helpers come from a module script further down the page, which
         // (like all module scripts) runs deferred - only after DOMContentLoaded is it
         // guaranteed to have executed, so the summary render waits for that event too.
         document.addEventListener('DOMContentLoaded', renderCodeRunnerSummaryBlog);
@@ -875,15 +864,13 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
           e.preventDefault();
           const notes = document.getElementById('code-notes-blog')?.value?.trim() || '';
           const btn = this.querySelector('button[type="submit"]');
-          if (window.unsavedRunners().length > 0) {
-            showStatusBlog('error', 'Save your code with the 💾 button in each runner before submitting.');
+          const error = window.submissionError();
+          if (error) {
+            showStatusBlog('error', error);
             return;
           }
-          const files = window.readRunners();
-          if (Object.keys(files).length === 0) {
-            showStatusBlog('error', "No saved code found in this lesson's code runner(s).");
-            return;
-          }
+          const files = window.readRunners({ selectedOnly: true });
+          const manifest = { kinds: window.readRunnerKinds({ selectedOnly: true }), runners: window.runnerSelectionSummary() };
           const selfAssessment = getSelfAssessmentDataBlog();
           // Self-assessment is paused, so its required-field check is off for now.
           // const selfAssessmentError = validateSelfAssessmentBlog(selfAssessment);
@@ -904,7 +891,7 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
           showStatusBlog('loading', 'Creating Gist and submitting...');
           try {
             const assignmentId = await ensureAssignmentIdBlog();
-            const gistUrl = await window.exportToGist(files, { type: 'submission', description: notes || 'Code submission' });
+            const gistUrl = await window.exportToGist(files, { type: 'submission', description: notes || 'Code submission', manifest });
             const content = { type: 'code', url: gistUrl, notes };
             const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
               ...fetchOptions,
@@ -973,24 +960,20 @@ Sprint and blogs pages are not part of one week, so their current_week is null.
   {%- endif -%}
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 
-  <!-- Enhanced Analytics Tracking -->
   <script type="module">
     import { pythonURI, javaURI, fetchOptions } from '{{ site.baseurl }}/assets/js/api/config.js';
     import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
     import { appendGistSettingsLink } from '{{ site.baseurl }}/assets/js/gist-connection-errors.js';
-    import { listRunners, unsavedRunners, readRunners } from '{{ site.baseurl }}/assets/js/runner-io.js';
+    import { readRunners, readRunnerKinds, runnerSelectionSummary } from '{{ site.baseurl }}/assets/js/runner-io.js';
+    import { mountSubmissionSummary, submissionError } from '{{ site.baseurl }}/assets/js/runner-submission.js';
     window.pythonURI = pythonURI;
     window.javaURI = javaURI;
     window.fetchOptions = fetchOptions;
     window.exportToGist = exportToGist;
     window.appendGistSettingsLink = appendGistSettingsLink;
     // Used by the blog code-submission form, which runs in a classic script.
-    window.listRunners = listRunners;
-    window.unsavedRunners = unsavedRunners;
-    window.readRunners = readRunners;
+    Object.assign(window, { readRunners, readRunnerKinds, runnerSelectionSummary, mountSubmissionSummary, submissionError });
   </script>
-  <script src="{{ site.baseurl }}/assets/js/ocs-analytics-enhanced.js"></script>
-  <script src="{{ site.baseurl }}/assets/js/code-runner-analytics.js"></script>
   <script src="{{ site.baseurl }}/assets/js/lesson-completion.js"></script>
   <script src="{{ site.baseurl }}/assets/js/lesson-completion-bigsix.js"></script>
 </article>

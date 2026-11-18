@@ -117,6 +117,25 @@ git merge upstream/main --allow-unrelated-histories -X theirs # destructive reso
 # resolve conflicts, for instance VSCode will have them in Version Control secton with Continue button 
 ```
 
+#### Sync this template from Pages (maintainers)
+
+Portfolio is a selective downstream of `Open-Coding-Society/pages`, not a mirror.
+The [project registry](_projects/.makeprojects) defines what Portfolio publishes:
+its three existing games and the Blogs, Calendar, Login, Messages, Profile,
+Scraper, and Topics systems. The November 2026 sync used Pages revision
+`8b965e58a`. For the next update, review changes since that revision and bring
+over only registered systems and their shared converter, Sass, JavaScript,
+include, and layout dependencies.
+
+Edit system sources under [`_projects/systems/`](_projects/systems/), not their
+published copies. Project Makefiles are generated from
+[`_projects/_template/Makefile`](_projects/_template/Makefile). Portfolio keeps
+its existing course document player and splitter, without the Pages Courses
+system. Topics owns the `/search/` and legacy `/topics/view/` redirects.
+
+Run `make build` from the Portfolio root after syncing. Check the rendered site
+under `/portfolio`, including Login, Topics and its redirects, and Messages.
+
 #### Windows WSL and/or Ubuntu or Kali Users
 
 - Execute the script: `./scripts/activate_ubuntu.sh` or `./scripts/activate_kali.sh`

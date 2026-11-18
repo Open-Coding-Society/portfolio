@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   canDeleteGroup, canFormGroups, classifyDmEvent, classifyGroupEvent, confirmsGroupName, conversationLabel, dayLabel,
-  deleteGroupWarning, dmMessage, downloadName, groupMessage, groupSubtitle, initialsFor, isAdmin, isClassGroup,
-  isCourseChannel, isGroupMember, isImageFile, pfpSrc, sortGroups, tintFor,
+  deleteGroupWarning, dmMessage, downloadName, groupMessage, groupSubtitle, highlightParts, initialsFor, isAdmin,
+  isClassGroup, isCourseChannel, isGroupMember, isImageFile, pfpSrc, sortGroups, tintFor,
 } from '../js/messages-model.js';
 
 test('dmMessage keeps the sender uid as the key that marks your own messages', () => {
@@ -32,9 +32,13 @@ test('dmMessage names an unnamed sender by uid and keys a message without an id 
   assert.equal(message.key, 'ada|2026-10-20T10:00:00Z');
 });
 
-test('groupMessage reads a saved group chat message, whose only sender field is the display name', () => {
+// Spring's field is `author`. It was `name` once, and reading the old field silently
+// produced "Unknown" senders and made your own messages look like someone else's,
+// because senderKey came back empty and never matched selfKey.
+test('groupMessage reads a saved group chat message, whose sender field is author', () => {
   const message = groupMessage({
-    id: 'uuid-1', name: 'Ada Lovelace', message: 'hello team', date: '2026-10-20T10:00:00Z', image: null, edited: false,
+    id: 'uuid-1', author: 'Ada Lovelace', author_uid: 'ada', message: 'hello team',
+    date: '2026-10-20T10:00:00Z', image: null, edited: false,
   });
   assert.deepEqual(message, {
     id: 'uuid-1', key: 'uuid-1', senderKey: 'Ada Lovelace', senderName: 'Ada Lovelace', senderPfp: null,
@@ -42,8 +46,13 @@ test('groupMessage reads a saved group chat message, whose only sender field is 
   });
 });
 
+test('groupMessage does not read a sender out of the field Spring no longer sends', () => {
+  const message = groupMessage({ id: 'uuid-9', name: 'Ada Lovelace', message: 'hi', date: '2026-10-20T10:00:00Z' });
+  assert.equal(message.senderName, 'Unknown');
+});
+
 test('groupMessage keys an old message that has no id by sender, time and text', () => {
-  const message = groupMessage({ name: 'Ada', message: 'hi', date: '2026-01-01T00:00:00Z', image: 'abc' });
+  const message = groupMessage({ author: 'Ada', message: 'hi', date: '2026-01-01T00:00:00Z', image: 'abc' });
   assert.equal(message.id, '');
   assert.equal(message.key, 'Ada|2026-01-01T00:00:00Z|hi');
   assert.equal(message.image, 'abc');
@@ -245,4 +254,30 @@ test('isImageFile and downloadName read a shared file name', () => {
   assert.equal(isImageFile('notes.pdf'), false);
   assert.equal(downloadName('a/b\\plan.pdf'), 'plan.pdf');
   assert.equal(downloadName(''), 'file');
+});
+
+test('highlightParts marks every place the query appears, whatever its case', () => {
+  assert.deepEqual(highlightParts('Sprint plan: sprint 3 starts', 'SPRINT'), [
+    { text: 'Sprint', match: true },
+    { text: ' plan: ', match: false },
+    { text: 'sprint', match: true },
+    { text: ' 3 starts', match: false },
+  ]);
+});
+
+test('highlightParts leaves text without the query, or with no query, as one plain part', () => {
+  assert.deepEqual(highlightParts('nothing here', 'sprint'), [{ text: 'nothing here', match: false }]);
+  assert.deepEqual(highlightParts('nothing here', '  '), [{ text: 'nothing here', match: false }]);
+  assert.deepEqual(highlightParts('', 'sprint'), []);
+  assert.deepEqual(highlightParts(null, 'sprint'), []);
+});
+
+test('highlightParts keeps markup in a message as text', () => {
+  assert.deepEqual(highlightParts('<b>bold</b> move', 'b>'), [
+    { text: '<', match: false },
+    { text: 'b>', match: true },
+    { text: 'bold</', match: false },
+    { text: 'b>', match: true },
+    { text: ' move', match: false },
+  ]);
 });

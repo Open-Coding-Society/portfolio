@@ -6,6 +6,7 @@ import { createChatSocket } from './chat-socket.js';
 import { initDeleteGroup } from './delete-group.js';
 import { initGroupFormation } from './group-formation.js';
 import { initFiles, initFindGroup, initMembers } from './group-dialogs.js';
+import { initMessageSearch } from './message-search.js';
 import { createMessagesApi } from './messages-api.js';
 import {
   canFormGroups, conversationLabel, groupSubtitle, isClassGroup, isCourseChannel, sortGroups,
@@ -52,7 +53,13 @@ export async function startMessagesPage({ config, richText }) {
 
   const me = await signedInPerson(api, setStatus);
   if (!me) return;
-  const state = { groups: [], conversations: [], active: null };
+  const state = { groups: [], conversations: [], active: null, query: '' };
+  let messageSearch = null; // set once the search box is wired up, below
+  // The search box in the chat header searches the open direct message, so it is told which.
+  const syncSearchScope = () => {
+    const open = state.active?.kind === 'dm' ? findItem('dm', state.active.id) : null;
+    messageSearch?.setConversation(open ? open.id : null, open ? conversationLabel(open) : '');
+  };
   const findItem = (kind, id) => (kind === 'group' ? state.groups : state.conversations).find(item => item.id === id);
 
   const sidebar = createSidebar({
@@ -61,6 +68,21 @@ export async function startMessagesPage({ config, richText }) {
     onOpen: (kind, id) => openConversation(kind, id),
   });
   const render = () => sidebar.render(state);
+  // "Find a conversation" narrows both lists as you type; Escape clears it.
+  const conversationSearch = byId('messagesConversationSearch');
+  if (conversationSearch) {
+    conversationSearch.addEventListener('input', () => {
+      state.query = conversationSearch.value.trim();
+      render();
+    });
+    conversationSearch.addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || !conversationSearch.value) return;
+      event.preventDefault();
+      conversationSearch.value = '';
+      state.query = '';
+      render();
+    });
+  }
 
   const socket = createChatSocket(config.javaWebSocketURI, { onClose: () => setStatus('disconnected', 'is-error') });
   const files = initFiles({
@@ -79,6 +101,9 @@ export async function startMessagesPage({ config, richText }) {
       title: byId('messagesThreadTitle'), subtitle: byId('messagesThreadSubtitle'), messages: byId('messagesLog'),
       form: byId('messagesForm'), send: byId('messagesSend'), cancelEdit: byId('messagesCancelEdit'),
       formStatus: byId('messagesFormStatus'),
+      imageAttach: byId('messagesImageAttach'), imageInput: byId('messagesImage'),
+      imagePreview: byId('messagesImagePreview'), imageThumb: byId('messagesImageThumb'),
+      imageRemove: byId('messagesImageRemove'), dropHint: byId('messagesDropHint'),
     },
     onDmRead: id => {
       const conversation = findItem('dm', id);
@@ -86,6 +111,7 @@ export async function startMessagesPage({ config, richText }) {
       conversation.unreadCount = 0;
       render();
     },
+    onGroupRead: id => markGroupRead(findItem('group', id)),
     onFileShared: id => files.refreshIfShowing(id),
   });
 
@@ -100,6 +126,23 @@ export async function startMessagesPage({ config, richText }) {
     byId('messagesLeaveGroup').classList.toggle('hidden', isClassGroup(group));
   }
 
+  // Clears the badge straight away, then tells Spring, then the navbar bell. The count is
+  // a notification, so a failed write is not worth interrupting the person for -- the
+  // next load corrects it.
+  async function markGroupRead(group) {
+    if (!group) return;
+    if (group.unreadCount) {
+      group.unreadCount = 0;
+      render();
+    }
+    try {
+      await api.markGroupRead(group.id);
+      window.dispatchEvent(new CustomEvent('dm:group-read', { detail: { groupId: group.id } }));
+    } catch (error) {
+      console.warn('Messages: could not mark the group read', error);
+    }
+  }
+
   function openConversation(kind, id) {
     const item = findItem(kind, id);
     if (!item) return false;
@@ -109,21 +152,41 @@ export async function startMessagesPage({ config, richText }) {
     if (!thread.open(kind, id, heading)) return false;
     state.active = { kind, id };
     notice.textContent = '';
+    // Opening a group clears its badge. Done here rather than in thread.js so it
+    // happens once per open, matching how a DM is marked read.
+    if (kind === 'group') markGroupRead(item);
     render();
+    syncSearchScope();
     showGroupActions(kind === 'group' ? item : null);
     history.replaceState(null, '', conversationHref(kind, id));
-    // At 768px and below (ocs__split's one-column width) the chat sits under the lists.
-    if (window.matchMedia('(max-width: 768px)').matches) {
-      byId('messagesThreadTitle').scrollIntoView({ block: 'start', behavior: 'smooth' });
-    }
+    // Nothing to scroll to on a phone: the page shows one pane at a time there (dm.md's
+    // inline script swaps the list for the conversation), and the pane fills the window.
     return true;
   }
 
   function closeConversation() {
     thread.close();
     state.active = null;
+    syncSearchScope();
     showGroupActions(null);
     history.replaceState(null, '', window.location.pathname);
+  }
+
+  // Unread counts live apart from the groups themselves (Spring counts them by reading
+  // each group's message file), so they are fetched separately and folded in. Best
+  // effort: a failure leaves the lists usable, just without counts.
+  async function loadGroupUnread() {
+    let unreadByGroup = {};
+    try {
+      unreadByGroup = (await api.groupUnread())?.unreadByGroup || {};
+    } catch (error) {
+      console.warn('Messages: could not load group notifications', error);
+      return;
+    }
+    state.groups.forEach(group => {
+      group.unreadCount = Number(unreadByGroup[group.id] || 0);
+    });
+    render();
   }
 
   async function loadGroups() {
@@ -134,7 +197,13 @@ export async function startMessagesPage({ config, richText }) {
       notice.textContent = 'Could not load your groups. Reload the page to try again.';
     }
     render();
+    loadGroupUnread();
   }
+
+  // The page only follows the open conversation's socket topic, so a message posted in
+  // another group never reaches it. The navbar bell re-counts groups when the tab comes
+  // back to the front and every couple of minutes, and its 'dm:unread' summary (below)
+  // carries the counts here, so the page doesn't ask Spring a second time.
 
   async function loadConversations() {
     try {
@@ -240,6 +309,18 @@ export async function startMessagesPage({ config, richText }) {
       status: byId('newChatStatus'), start: byId('newChatStart'),
     },
   });
+  messageSearch = initMessageSearch({
+    api,
+    me,
+    // The box only searches the open chat, so a match is always in the thread on screen.
+    onPick: hit => thread.showMessage(String(hit.id)),
+    cleanExcerpt: typeof richText.stripChatMarkers === 'function' ? richText.stripChatMarkers : undefined,
+    elements: {
+      form: byId('messagesSearchForm'), input: byId('messagesSearch'), panel: byId('messagesSearchPanel'),
+      status: byId('messagesSearchStatus'), results: byId('messagesSearchResults'),
+    },
+  });
+  syncSearchScope(); // a conversation opened from the address before the box existed
   if (canFormGroups(me)) {
     initGroupFormation({
       api,
@@ -257,10 +338,18 @@ export async function startMessagesPage({ config, richText }) {
   }
   byId('messagesFindGroup').disabled = false;
   byId('messagesNewChat').disabled = false;
+  if (conversationSearch) conversationSearch.disabled = false;
 
   // The navbar bell's summary keeps the unread counts current, and shows conversations
   // someone else started since the list loaded.
   window.addEventListener('dm:unread', ({ detail }) => {
+    // A group the bell counts but the list doesn't have is one the page leaves alone.
+    // The open group is marked read as messages arrive, so it never shows a count.
+    const groupCounts = detail.groups || {};
+    state.groups.forEach(group => {
+      const isOpen = state.active?.kind === 'group' && state.active.id === group.id;
+      group.unreadCount = isOpen ? 0 : Number(groupCounts[group.id] || 0);
+    });
     const counts = detail.conversations || {};
     const known = new Set(state.conversations.map(conversation => String(conversation.id)));
     if (Object.keys(counts).some(id => !known.has(id))) {

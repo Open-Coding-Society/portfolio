@@ -1,0 +1,209 @@
+// The page shell: the conversation list beside the open conversation, filling the
+// window under the site header.
+
+.dm {
+  font-family: var(--dm-font);
+  color: var(--dm-ink);
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+// /dm itself, as opposed to a conversation embedded in another page (.dm--embed, below).
+//
+// The page is an application, not a document, so it takes the whole window rather than
+// a card in the reading column. `full_width: true` in dm.md's front matter is the site's
+// switch for a wide page: it drops the layout wrapper's 800px cap and leaves 2rem of
+// padding either side, with the layout's 30px above and below. The negative margin
+// takes exactly that back, so the panes run edge to edge. The height is the window less
+// everything above the page; dm.md's inline script measures that into --dm-top (the
+// header's height changes with the window's width), and 3.5rem stands in until it has.
+.dm:not(.dm--embed) {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--dm-top, 3.5rem));
+  min-height: 24rem;
+  margin: -#{$spacing-xl} -2rem;
+  background: var(--dm-bg);
+}
+
+// Anything the page has to say before there are conversations to show (signed out,
+// Spring unreachable): one line across the top, gone when it is empty.
+.dm__notice {
+  flex: none;
+  margin: 0;
+  padding: var(--dm-space-sm) var(--dm-gutter);
+  border-bottom: 1px solid var(--dm-rule);
+  background: var(--dm-surface);
+  font-size: $text-md;
+  line-height: 1.5;
+  color: var(--dm-ink);
+
+  &:empty {
+    display: none;
+  }
+}
+
+// ── The two panes ──────────────────────────────────────────────────────────────
+.dm__shell {
+  display: grid;
+  grid-template-columns: var(--dm-aside-width) minmax(0, 1fr);
+  min-height: 0;
+  flex: 1;
+}
+
+.dm__aside {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  border-right: 1px solid var(--dm-rule);
+  background: var(--dm-surface);
+}
+
+// The bar across the top of the list: the page's title, and whether it is connected.
+.dm__masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--dm-space-sm);
+  flex: none;
+  height: var(--dm-bar);
+  padding-inline: var(--dm-space-md);
+  border-bottom: 1px solid var(--dm-rule);
+}
+
+.dm__title {
+  margin: 0;
+  font-family: var(--dm-font);
+  font-size: $text-xl;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--dm-ink);
+}
+
+.dm__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex: none;
+  font-family: var(--dm-font);
+  font-size: $text-sm;
+  line-height: 1;
+
+  > span:last-child {
+    @include dm-quiet;
+  }
+}
+
+// Connection state, the one bit of colour-as-signal on the page. messages-page.js puts
+// is-live, is-error or is-preview on the pill. The colour goes on the dot's background:
+// the label beside it is a span, which a user theme holds to the text colour, and a
+// state said in words should not depend on its colour anyway.
+.dm__status-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--dm-faint);
+}
+
+.dm__status.is-live .dm__status-dot {
+  background: var(--green);
+}
+
+.dm__status.is-error .dm__status-dot {
+  background: var(--red);
+}
+
+.dm__status.is-preview .dm__status-dot {
+  background: var(--warn);
+}
+
+// The scroll container, so the bar above it stays put while the list moves.
+.dm__aside-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--dm-space-md) var(--dm-space-xs) var(--dm-space-lg);
+}
+
+.dm__thread {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.dm .dm__back {
+  display: none; // shown only in the single-column layout
+}
+
+@include dm-below($breakpoint-mobile) {
+  .dm__shell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dm__aside {
+    border-right: 0;
+  }
+
+  // One pane at a time. `data-dm-view` is set by the page's own inline script when a
+  // conversation opens and cleared by the back control.
+  .dm[data-dm-view='thread'] .dm__aside,
+  .dm:not([data-dm-view='thread']) .dm__thread {
+    display: none;
+  }
+
+  .dm .dm__back {
+    @include dm-quiet-button;
+    flex: none;
+
+    &::before {
+      content: '\2190';
+    }
+  }
+}
+
+// ── Embedded in another page ───────────────────────────────────────────────────
+// js/conversation-embed.js shows one conversation in a host's column, such as a UI
+// Builder page's group chat. It keeps to that column instead of taking the window, its
+// content sits flush with the column's edges, and with no shell to fill, the log scrolls
+// inside a fixed height.
+.dm.dm--embed {
+  --dm-embed-log-height: clamp(14rem, 45dvh, 28rem);
+  --dm-gutter: 0px;
+}
+
+.dm--embed .dm__log {
+  flex: none;
+  height: var(--dm-embed-log-height);
+}
+
+// The one line an embed shows instead of a conversation is not a banner across a page.
+.dm--embed .dm__notice {
+  padding-inline: 0;
+  border-bottom: 0;
+  background: none;
+}
+
+// The sign-in link shown to a visitor who isn't signed in, coloured like a link in a message.
+.dm--embed .dm__notice a {
+  color: var(--dm-accent);
+  text-underline-offset: 2px;
+
+  @include dm-focus-ring;
+}
+
+@include dm-below($breakpoint-mobile) {
+  // The one-pane rule above hides the thread until a conversation is picked from the
+  // lists. An embed has no lists, only the thread. Same specificity, so it comes after.
+  .dm.dm--embed .dm__thread {
+    display: flex;
+  }
+}

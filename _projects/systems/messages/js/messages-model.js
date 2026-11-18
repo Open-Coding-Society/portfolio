@@ -20,13 +20,21 @@ export function dmMessage(raw) {
     sentAt: raw.sentAt || null,
     edited: Boolean(raw.edited),
     deleted,
-    image: null,
+    image: raw.image || null,
   };
 }
 
+// Spring calls the sender `author` on a saved message. The socket frame calls the same
+// person `sender`, and classifyGroupEvent maps that onto `author` before calling this,
+// so both paths produce one shape.
+//
+// Still the display name rather than the uid, even though a saved message now also
+// carries author_uid: the socket frame has no uid at all, and Spring authorises a group
+// edit or delete by comparing display names. Keying off the uid here would leave live
+// messages unattributable and would disagree with what the server actually enforces.
 export function groupMessage(raw) {
   const id = asId(raw.id);
-  const name = raw.name || '';
+  const name = raw.author || '';
   return {
     id,
     key: id || `${name}|${raw.date}|${raw.message}`,
@@ -49,7 +57,7 @@ export function classifyGroupEvent(event) {
       return {
         type: 'message',
         message: groupMessage({
-          id: event.messageId, name: event.sender, message: event.message, date: event.date, image: event.image,
+          id: event.messageId, author: event.sender, message: event.message, date: event.date, image: event.image,
         }),
       };
     case 'editMessageServer':
@@ -88,6 +96,48 @@ export function conversationLabel(conversation) {
   return names.length ? names.join(', ') : 'Conversation';
 }
 
+// Search asks Spring only for a query at least this long, and Spring answers with at most
+// this many messages. Both mirror DirectMessageService's MIN_SEARCH_LENGTH and
+// MAX_SEARCH_RESULTS, so the page can say why nothing was asked or that there may be more.
+export const MIN_SEARCH_LENGTH = 2;
+export const MAX_SEARCH_RESULTS = 50;
+
+// Splits `text` around every place `query` appears, ignoring case: [{ text, match }].
+// Parts rather than HTML, so a result is built from text nodes and nothing in a message
+// is ever read as markup.
+export function highlightParts(text, query) {
+  const source = String(text ?? '');
+  const needle = String(query ?? '').trim().toLowerCase();
+  if (!source) return [];
+  if (!needle) return [{ text: source, match: false }];
+  const haystack = source.toLowerCase();
+  const parts = [];
+  let from = 0;
+  for (let at = haystack.indexOf(needle); at !== -1; at = haystack.indexOf(needle, from)) {
+    if (at > from) parts.push({ text: source.slice(from, at), match: false });
+    parts.push({ text: source.slice(at, at + needle.length), match: true });
+    from = at + needle.length;
+  }
+  if (from < source.length) parts.push({ text: source.slice(from), match: false });
+  return parts;
+}
+
+// Whether a sidebar row matches the "Find a conversation" box: every typed word appears
+// in a group's name, course or period, or in a member's or participant's name or uid.
+// Case doesn't matter, and an empty search matches everything.
+export function matchesConversationSearch(kind, item, query) {
+  const terms = String(query ?? '').toLowerCase().split(/\s+/).filter(Boolean);
+  if (!terms.length) return true;
+  const people = kind === 'group' ? item?.members : item?.participants;
+  const searchable = [
+    kind === 'group' ? item?.name : '',
+    kind === 'group' ? item?.course : '',
+    kind === 'group' && item?.period ? `period ${item.period}` : '',
+    ...(people || []).flatMap(person => [person?.name, person?.uid]),
+  ].filter(Boolean).join('\n').toLowerCase();
+  return terms.every(term => searchable.includes(term));
+}
+
 export function groupSubtitle(group) {
   const count = (group.members || []).length;
   return [
@@ -107,9 +157,9 @@ export const canFormGroups = person => isAdmin(person) || hasRole(person, 'ROLE_
 
 export const isGroupMember = (group, personId) => (group.members || []).some(member => member.id === personId);
 
-// The course pages chat in groups named "lessons", "<course>-announcements" and
-// "<course>-week-<n>" (_projects/systems/courses/_includes/*_chat.html). Those aren't
-// groups to join here.
+// The course pages chat in groups named "lessons" and "<course>-announcements"
+// (_projects/systems/courses/_includes/*_chat.html). "<course>-week-<n>" groups are left
+// from the removed week chats. None of those are groups to join here.
 export const isCourseChannel = group => /^(lessons|[a-z]+-announcements|[a-z]+-week-\d+)$/i.test(group.name || '');
 
 // Spring's courses.class-groups. Profile class changes add and remove these memberships

@@ -10,7 +10,14 @@ Check if this is a course lesson and determine which course context to use
 {% assign current_week = null %}
 
 {% comment %}Since files are now course-specific, get the single course{% endcomment %}
-{% if page.courses.csp %}
+{% if page.player_page %}
+{% comment %}
+A sprint, week, chat, or blogs page made by _plugins/lesson_player_pages.rb.
+Sprint and blogs pages are not part of one week, so their current_week is null.
+{% endcomment %}
+{% assign current_course = page.player_page.course %}
+{% assign current_week = page.player_page.week %}
+{% elsif page.courses.csp %}
 {% assign current_course = 'csp' %}
 {% assign current_week = page.courses.csp.week | plus: 0 %}
 {% elsif page.courses.csa %}
@@ -19,759 +26,25 @@ Check if this is a course lesson and determine which course context to use
 {% elsif page.courses.csse %}
 {% assign current_course = 'csse' %}
 {% assign current_week = page.courses.csse.week | plus: 0 %}
-{% elsif page.courses.cwgu %}
-{% assign current_course = 'cwgu' %}
-{% assign current_week = page.courses.cwgu.week | plus: 0 %}
+{% elsif page.courses.csh %}
+{% assign current_course = 'csh' %}
+{% assign current_week = page.courses.csh.week | plus: 0 %}
 {% endif %}
 
 {% if current_course != null and current_week != null %}
 {% assign is_course_lesson = true %}
+{% elsif page.player_page %}
+{% assign is_course_lesson = true %}
 {% endif %}
 
+{% if page.topics_context %}{% assign is_course_lesson = false %}{% endif %}
 {% if is_course_lesson %}
-{% comment %}
-=== TWO-PANE LESSON PLAYER FOR CSP COURSES ===
-{% endcomment %}
-
-{% assign posts = null | compact %}
-{% assign posts = posts | concat: site.posts | concat: site.pages %}
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-<div class="lesson-player">
-  <!-- LEFT SIDEBAR -->
-  {% include lesson-sidebar-nav.html %}
-
-  <!-- MAIN CONTENT -->
-  <div class="lesson-main">
-    <!-- Top Bar -->
-    {% include lesson-topbar.html %}
-
-    <!-- Lesson Content -->
-    <div class="lesson-content">
-      <div class="lesson-content-inner">
-        <div class="lesson-header">
-          <h1>{{ page.title | escape }}</h1>
-          <div class="lesson-meta">
-            {%- if page.show_reading_time != false -%}
-            <span><i class="fas fa-clock"></i> {% include reading_time.html %}</span>
-            {%- endif -%}
-            {% if page.assignment %}
-            <span>•</span>
-            <span><i class="fas fa-file-alt"></i> Assignment</span>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="lesson-body">
-          {%- if page.toc -%}
-          {% include toc.html html=content %}
-          {%- endif -%}
-
-          {%- if page.submenu -%}
-          {%- include submenu.html -%}
-          {%- endif -%}
-
-          {{ content }}
-
-          {% if page.show_gist_export %}
-          {% comment %} Only show the export button when the notebook explicitly requests it {% endcomment %}
-          {% include gist-export-button.html %}
-          {% endif %}
-
-          {% if page.assignment %}
-          {% include lesson-submission-form.html %}
-          {% endif %}
-        </div>
-
-        {%- if page.comments -%}
-        <div style="margin-top: 48px; padding-top: 24px; border-top: 1px solid #2a2a2a;">
-          {%- include utterances.html -%}
-        </div>
-        {%- endif -%}
-      </div>
-    </div>
-</div>
-
-{% if page.challenge_submit %}
-<script>
-  // Wire the bottom-bar "Submit Lesson" button to the lesson submit component injected by notebook conversion.
-  (function () {
-    const btn = document.getElementById('submit-lesson-btn');
-    if (!btn) return;
-
-    btn.addEventListener('click', () => {
-      // Prefer clicking the existing lesson submit button if present
-      const lessonSubmitBtn = document.querySelector('.lesson-submit-container .lesson-submit-btn');
-      if (lessonSubmitBtn) {
-        lessonSubmitBtn.click();
-        return;
-      }
-
-      // Fallback: scroll to any submit UI on the page
-      const submitContainer = document.querySelector('.lesson-submit-container');
-      if (submitContainer) {
-        submitContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    });
-  })();
-</script>
-{% endif %}
-
-<!-- Modals for lesson player -->
-{% include lesson-modals.html %}
-
-<script type="module">
-  import { pythonURI, fetchOptions, javaURI } from '{{ site.baseurl }}/assets/js/api/config.js';
-
-  /**
-   * ============================================
-   * CONFIGURATION & CONSTANTS
-   * ============================================
-   */
-  const COURSE = '{{ current_course }}';
-  const WEEK = '{{ current_week }}';
-  const PAGE_TITLE = "{{ page.title }}";
-  const CURRENT_LESSON_ID = '{{ page.url }}';
-  const STORAGE_KEY = `${COURSE}-lesson-completion`;
-  const STATUS_AUTO_HIDE_MS = 5000;
-  const FILE_SIZE_LIMIT_MB = 10;
-  const ASSIGNMENT_ID = {{ page.assignment_id | default: 'null' }};
-  const ASSIGNMENT_NAME = {{ page.assignment_name | default: 'null' | jsonify }};
-
-  /**
-   * ============================================
-   * SPRINT NAVIGATION: Toggle sprint visibility
-   * ============================================
-   */
-  window.toggleSprint = function (sprintId) {
-    const lessons = document.getElementById(`sprint-${sprintId}-lessons`);
-    const chevron = document.getElementById(`chevron-${sprintId}`);
-    if (!lessons || !chevron) return;
-
-    const isHidden = lessons.style.display === 'none';
-    lessons.style.display = isHidden ? 'block' : 'none';
-    chevron.classList.toggle('fa-chevron-right', !isHidden);
-    chevron.classList.toggle('fa-chevron-down', isHidden);
-  };
-
-  /**
-   * ============================================
-   * COMPLETION DATA LAYER: LocalStorage operations
-   * ============================================
-   */
-  function getCompletionData() {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : {};
-    } catch (e) {
-      console.error('Error reading completion data:', e);
-      return {};
-    }
-  }
-
-  function saveCompletionData(data) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) {
-      console.error('Error saving completion data:', e);
-    }
-  }
-
-  /**
-   * ============================================
-   * COMPLETION TOGGLING: Toggle lesson status
-   * ============================================
-   */
-  window.toggleComplete = function () {
-    const completionData = getCompletionData();
-    const isCompleted = completionData[CURRENT_LESSON_ID] || false;
-    completionData[CURRENT_LESSON_ID] = !isCompleted;
-    saveCompletionData(completionData);
-
-    syncCompletionUI();
-    window.dispatchEvent(new CustomEvent('completionChanged', {
-      detail: { itemId: CURRENT_LESSON_ID, completed: !isCompleted }
-    }));
-  };
-
-  /**
-   * ============================================
-   * UI UPDATES: Individual responsibility functions
-   * ============================================
-   */
-  function updateCompleteButton(isCompleted) {
-    const updateButton = (iconId, textId) => {
-      const icon = document.getElementById(iconId);
-      const text = document.getElementById(textId);
-      if (!icon || !text) return;
-      
-      icon.classList.toggle('fa-circle', !isCompleted);
-      icon.classList.toggle('fa-circle-check', isCompleted);
-      text.textContent = isCompleted ? 'Completed' : 'Burndown';
-    };
-    
-    updateButton('complete-icon', 'complete-text');
-    updateButton('complete-icon-topbar', 'complete-text-topbar');
-  }
-
-  function updateLessonItems(completionData) {
-    let completed = 0;
-    const lessonItems = document.querySelectorAll('.lesson-item');
-    
-    lessonItems.forEach(item => {
-      const lessonId = item.dataset.lessonId;
-      const icon = item.querySelector('.lesson-status-icon');
-      const isCompleted = completionData[lessonId] || false;
-      
-      if (icon) {
-        icon.classList.toggle('fa-circle', !isCompleted);
-        icon.classList.toggle('fa-circle-check', isCompleted);
-        icon.classList.toggle('incomplete', !isCompleted);
-        icon.classList.toggle('completed', isCompleted);
-      }
-      
-      if (isCompleted) completed++;
-    });
-    
-    return { total: lessonItems.length, completed };
-  }
-
-  function updateProgressBars(completionData) {
-    const lessonItems = Array.from(document.querySelectorAll('.lesson-item'));
-    const stats = updateLessonItems(completionData);
-    
-    const sidebarProgress = document.getElementById('sidebar-progress');
-    if (sidebarProgress) {
-      const sidebarPercent = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
-      sidebarProgress.style.width = `${sidebarPercent}%`;
-    }
-    
-    const progressCount = document.getElementById('progress-count');
-    if (progressCount) {
-      progressCount.textContent = `${stats.completed}/${stats.total}`;
-    }
-    
-    const lessonProgress = document.getElementById('lesson-progress');
-    if (lessonProgress) {
-      const currentIndex = lessonItems.findIndex(item => item.classList.contains('active'));
-      const lessonPercent = stats.total > 0 ? ((currentIndex + 1) / stats.total) * 100 : 0;
-      lessonProgress.style.width = `${lessonPercent}%`;
-    }
-  }
-
-  function syncCompletionUI() {
-    const completionData = getCompletionData();
-    const isCompleted = completionData[CURRENT_LESSON_ID] || false;
-    updateCompleteButton(isCompleted);
-    updateProgressBars(completionData);
-  }
-
-  /**
-   * ============================================
-   * LESSON NAVIGATION: Move between lessons
-   * ============================================
-   */
-  window.prevLesson = function () {
-    const lessonItems = Array.from(document.querySelectorAll('.lesson-item'));
-    const currentIndex = lessonItems.findIndex(item => item.classList.contains('active'));
-    if (currentIndex > 0) {
-      window.location.href = lessonItems[currentIndex - 1].href;
-    } else {
-      alert('You are on the first lesson!');
-    }
-  };
-
-  window.nextLesson = function () {
-    const lessonItems = Array.from(document.querySelectorAll('.lesson-item'));
-    const currentIndex = lessonItems.findIndex(item => item.classList.contains('active'));
-    if (currentIndex >= 0 && currentIndex < lessonItems.length - 1) {
-      window.location.href = lessonItems[currentIndex + 1].href;
-    } else {
-      alert('You\'ve reached the last lesson!');
-    }
-  };
-
-  /**
-   * ============================================
-   * INITIALIZATION: Player setup
-   * ============================================
-   */
-  function initLessonPlayer() {
-    if (document.querySelector('.lesson-player')) {
-      document.body.style.margin = '0';
-      document.body.style.padding = '0';
-    }
-  }
-
-  function expandCurrentSprint() {
-    const activeLesson = document.querySelector('.lesson-item.active');
-    if (!activeLesson) return;
-    
-    const sprintSection = activeLesson.closest('.sprint-section');
-    if (sprintSection) {
-      const sprintToggle = sprintSection.querySelector('.sprint-toggle');
-      if (sprintToggle) sprintToggle.click();
-    }
-  }
-
-  /**
-   * ============================================
-   * CROSS-TAB SYNC: Listen for changes
-   * ============================================
-   */
-  function setupSyncListeners() {
-    window.addEventListener('focus', () => {
-      if (document.querySelector('.lesson-player')) syncCompletionUI();
-    });
-
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden && document.querySelector('.lesson-player')) syncCompletionUI();
-    });
-
-    window.addEventListener('storage', (e) => {
-      if (e.key === STORAGE_KEY && document.querySelector('.lesson-player')) {
-        syncCompletionUI();
-      }
-    });
-
-    window.addEventListener('completionChanged', () => {
-      if (document.querySelector('.lesson-player')) syncCompletionUI();
-    });
-  }
-
-  /**
-   * ============================================
-   * TIMELINE MODAL: Mobile navigation
-   * ============================================
-   */
-  function buildTimelineModal() {
-    const completionData = getCompletionData();
-    const lessonItems = document.querySelectorAll('.lesson-item');
-    const sprintGroups = {};
-
-    lessonItems.forEach(item => {
-      const sprintSection = item.closest('.sprint-section');
-      if (!sprintSection) return;
-      
-      const sprintTitle = sprintSection.querySelector('.sprint-title').textContent;
-      if (!sprintGroups[sprintTitle]) sprintGroups[sprintTitle] = [];
-      
-      sprintGroups[sprintTitle].push({
-        id: item.dataset.lessonId,
-        title: item.querySelector('.lesson-title').textContent,
-        url: item.href,
-        completed: completionData[item.dataset.lessonId] || false,
-        active: item.classList.contains('active')
-      });
-    });
-
-    return sprintGroups;
-  }
-
-  function renderTimelineModal(sprintGroups) {
-    const modalContent = document.getElementById('timeline-modal-content');
-    if (!modalContent) return;
-
-    modalContent.innerHTML = Object.entries(sprintGroups).map(([sprintTitle, lessons]) => {
-      const sprintId = sprintTitle.replace(/\s+/g, '-').toLowerCase();
-      const lessonHTML = lessons.map(lesson => `
-        <a href="${lesson.url}" class="modal-lesson-item ${lesson.active ? 'active' : ''}">
-          <i class="fas ${lesson.completed ? 'fa-circle-check' : 'fa-circle'} modal-lesson-status ${lesson.completed ? 'completed' : 'incomplete'}"></i>
-          <span class="modal-lesson-title">${lesson.title}</span>
-        </a>
-      `).join('');
-      
-      return `
-        <div class="modal-sprint-card">
-          <div class="modal-sprint-header">
-            <h3 class="modal-sprint-title">${sprintTitle}</h3>
-            <button class="modal-sprint-toggle" onclick="toggleModalSprint('${sprintId}')">
-              <i class="fas fa-chevron-down"></i> View Lessons
-            </button>
-          </div>
-          <div class="modal-lessons" id="modal-${sprintId}">
-            ${lessonHTML}
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // Auto-expand active sprint
-    const sprintGroups_arr = Object.values(sprintGroups);
-    const activeSprintIndex = sprintGroups_arr.findIndex(lessons => 
-      lessons.some(l => l.active)
-    );
-    
-    if (activeSprintIndex !== -1) {
-      const activeSprintTitle = Object.keys(sprintGroups)[activeSprintIndex];
-      const sprintId = activeSprintTitle.replace(/\s+/g, '-').toLowerCase();
-      setTimeout(() => {
-        window.toggleModalSprint(sprintId);
-      }, 0);
-    }
-  }
-
-  window.toggleModalSprint = function (sprintId) {
-    const lessonsContainer = document.getElementById(`modal-${sprintId}`);
-    const toggleBtn = document.querySelector(`[onclick="toggleModalSprint('${sprintId}')"] i`);
-    if (!lessonsContainer || !toggleBtn) return;
-
-    lessonsContainer.classList.toggle('expanded');
-    toggleBtn.classList.toggle('fa-chevron-down', !lessonsContainer.classList.contains('expanded'));
-    toggleBtn.classList.toggle('fa-chevron-up', lessonsContainer.classList.contains('expanded'));
-  };
-
-  function setupMobileModal() {
-    const floatingBtn = document.getElementById('floating-menu-btn');
-    const timelineModal = document.getElementById('timeline-modal');
-    const overlay = document.getElementById('timeline-modal-overlay');
-    const closeBtn = document.getElementById('timeline-close-btn');
-    const modalContent = document.getElementById('timeline-modal-content');
-
-    if (window.innerWidth > 768) {
-      if (floatingBtn) floatingBtn.style.display = 'none';
-      return;
-    }
-
-    if (floatingBtn) floatingBtn.style.display = 'flex';
-
-    const sprintGroups = buildTimelineModal();
-    renderTimelineModal(sprintGroups);
-
-    const openModal = () => {
-      timelineModal.classList.add('open');
-      overlay.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    };
-
-    const closeModal = () => {
-      timelineModal.classList.remove('open');
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
-    };
-
-    if (floatingBtn) floatingBtn.addEventListener('click', openModal);
-    if (closeBtn) closeBtn.addEventListener('click', closeModal);
-    if (overlay) overlay.addEventListener('click', closeModal);
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && timelineModal.classList.contains('open')) closeModal();
-    });
-
-    if (modalContent) {
-      modalContent.addEventListener('click', (e) => {
-        if (e.target.closest('.modal-lesson-item')) closeModal();
-      });
-    }
-  }
-
-  /**
-   * ============================================
-   * ASSIGNMENT SUBMISSION: API operations
-   * ============================================
-   */
-  async function resolveCurrentUser() {
-    const uidRes = await fetch(`${pythonURI}/api/id`, fetchOptions);
-    if (!uidRes.ok) throw new Error('Not authenticated. Please log in.');
-    const { uid } = await uidRes.json();
-    const personRes = await fetch(`${javaURI}/api/person/uid/${encodeURIComponent(uid)}`, fetchOptions);
-    if (!personRes.ok) throw new Error('Could not resolve your account in the gradebook.');
-    const person = await personRes.json();
-    return { uid, personId: person.id };
-  }
-
-  async function resolveAssignmentName() {
-    if (typeof ASSIGNMENT_NAME === 'string' && ASSIGNMENT_NAME) return ASSIGNMENT_NAME;
-    const res = await fetch(`${javaURI}/api/assignments/${ASSIGNMENT_ID}`, fetchOptions);
-    if (!res.ok) throw new Error('Assignment not found on server.');
-    return await res.text();
-  }
-
-  async function submitLinkToBackend(link, description) {
-    if (!ASSIGNMENT_ID) throw new Error("Assignment ID not configured. Add assignment_id to this page's frontmatter.");
-    const { uid, personId } = await resolveCurrentUser();
-    const content = { type: 'link', url: link, notes: description };
-    const res = await fetch(`${javaURI}/api/submissions/${ASSIGNMENT_ID}`, {
-      ...fetchOptions,
-      method: 'POST',
-      body: JSON.stringify({
-        assignmentId: ASSIGNMENT_ID,
-        submitterId: personId,
-        isGroupSubmission: false,
-        content,
-        comment: description,
-        isLate: false
-      })
-    });
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      throw new Error(e.error || res.statusText);
-    }
-    // Dual-write to EshikaP1's grades system
-    const assignmentLabel = (typeof ASSIGNMENT_NAME === 'string' && ASSIGNMENT_NAME) ? ASSIGNMENT_NAME : String(ASSIGNMENT_ID);
-    await fetch(`${javaURI}/api/grades`, {
-      ...fetchOptions,
-      method: 'POST',
-      body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
-    }).catch(() => {}); // non-blocking — don't fail submission if grades write fails
-  }
-
-  async function submitFilesToBackend(files, notes) {
-    if (!ASSIGNMENT_ID) throw new Error("Assignment ID not configured. Add assignment_id to this page's frontmatter.");
-    const { uid, personId } = await resolveCurrentUser();
-    const assignmentName = await resolveAssignmentName();
-    for (const file of files) {
-      const content = { type: 'file', filename: file.name, notes: notes || '' };
-      const fd = new FormData();
-      fd.append('assignmentName', assignmentName);
-      fd.append('userId', personId);
-      fd.append('username', uid);
-      fd.append('file', file);
-      if (notes) fd.append('notes', notes);
-      const r = await fetch(`${javaURI}/api/assignment-submissions/upload`, {
-        method: 'POST',
-        mode: fetchOptions.mode,
-        credentials: fetchOptions.credentials,
-        headers: { 'X-Origin': 'client' },
-        body: fd
-      });
-      if (!r.ok) {
-        const e = await r.json().catch(() => ({}));
-        throw new Error(`Upload failed for ${file.name}: ` + (e.error || r.statusText));
-      }
-      // Dual-write to EshikaP1's grades system
-      const assignmentLabel = (typeof ASSIGNMENT_NAME === 'string' && ASSIGNMENT_NAME) ? ASSIGNMENT_NAME : String(ASSIGNMENT_ID);
-      await fetch(`${javaURI}/api/grades`, {
-        ...fetchOptions,
-        method: 'POST',
-        body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
-      }).catch(() => {}); // non-blocking
-    }
-  }
-
-  /**
-   * ============================================
-   * FILE HANDLING: File operations
-   * ============================================
-   */
-  function fileToBase64(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
-        if ((encoded.length % 4) > 0) {
-          encoded += '='.repeat(4 - (encoded.length % 4));
-        }
-        resolve(encoded);
-      };
-      reader.onerror = error => reject(error);
-    });
-  }
-
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-  }
-
-  /**
-   * ============================================
-   * STATUS MESSAGES: Display feedback
-   * ============================================
-   */
-  function showStatus(type, message) {
-    const status = document.getElementById('submission-status');
-    if (!status) return;
-    const icon = type === 'success' ? 'check-circle' : type === 'loading' ? 'spinner fa-spin' : 'exclamation-circle';
-    status.className = `submission-status ${type}`;
-    status.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
-    status.style.display = 'block';
-    if (type !== 'loading') {
-      setTimeout(() => {
-        status.style.display = 'none';
-      }, STATUS_AUTO_HIDE_MS);
-    }
-  }
-
-  /**
-   * ============================================
-   * SUBMISSION STORAGE: Local persistence
-   * ============================================
-   */
-  function saveSubmissionLocally(type, data) {
-    const submissions = JSON.parse(localStorage.getItem('assignment-submissions') || '{}');
-    const lessonId = window.location.pathname;
-    if (!submissions[lessonId]) submissions[lessonId] = [];
-    submissions[lessonId].push({ type, data, timestamp: new Date().toISOString() });
-    localStorage.setItem('assignment-submissions', JSON.stringify(submissions));
-  }
-
-  /**
-   * ============================================
-   * SUBMISSION UI: Tab switching & file display
-   * ============================================
-   */
-  window.switchSubmissionType = function (type) {
-    document.querySelectorAll('.submission-tab').forEach(tab => tab.classList.remove('active'));
-    event.target.closest('.submission-tab').classList.add('active');
-    
-    document.querySelectorAll('.submission-form').forEach(form => form.classList.remove('active'));
-    document.getElementById(`${type}-form`).classList.add('active');
-    
-    const status = document.getElementById('submission-status');
-    if (status) status.style.display = 'none';
-  };
-
-  window.removeFile = function (index) {
-    const fileInput = document.getElementById('file-input');
-    const fileList = document.getElementById('file-list');
-    if (!fileInput || !fileList) return;
-    
-    const dt = new DataTransfer();
-    Array.from(fileInput.files).forEach((file, i) => {
-      if (i !== index) dt.items.add(file);
-    });
-    fileInput.files = dt.files;
-    updateFileListDisplay();
-  };
-
-  /**
-   * ============================================
-   * FILE DISPLAY: Render file list
-   * ============================================
-   */
-  function updateFileListDisplay() {
-    const fileInput = document.getElementById('file-input');
-    const fileList = document.getElementById('file-list');
-    const fileSubmitBtn = document.getElementById('file-submit-btn');
-    
-    if (!fileList) return;
-    
-    fileList.innerHTML = Array.from(fileInput.files).map((file, index) => `
-      <div class="file-item">
-        <div class="file-info">
-          <i class="fas fa-file"></i>
-          <div>
-            <div class="file-name">${file.name}</div>
-            <div class="file-size">${formatFileSize(file.size)}</div>
-          </div>
-        </div>
-        <button type="button" class="remove-file" onclick="removeFile(${index})">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-    `).join('');
-    
-    if (fileSubmitBtn) fileSubmitBtn.disabled = fileInput.files.length === 0;
-  }
-
-  /**
-   * ============================================
-   * FORM SUBMISSION: Handle submissions
-   * ============================================
-   */
-  function setupSubmissionForms() {
-    const linkForm = document.getElementById('link-form');
-    if (linkForm) {
-      linkForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const link = document.getElementById('submission-link').value.trim();
-        const description = document.getElementById('link-description').value.trim();
-        const submitBtn = linkForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        showStatus('loading', 'Submitting...');
-        try {
-          await submitLinkToBackend(link, description);
-          saveSubmissionLocally('link', { link, description });
-          showStatus('success', 'Link submitted successfully!');
-          this.reset();
-        } catch (err) {
-          showStatus('error', err.message);
-        } finally {
-          submitBtn.disabled = false;
-        }
-      });
-    }
-
-    const fileForm = document.getElementById('file-form');
-    if (fileForm) {
-      fileForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-        const fileInput = document.getElementById('file-input');
-        const notes = document.getElementById('file-notes')?.value?.trim() || '';
-        const submitBtn = fileForm.querySelector('button[type="submit"]');
-        submitBtn.disabled = true;
-        showStatus('loading', 'Uploading...');
-        try {
-          for (const file of fileInput.files) {
-            if (file.size > FILE_SIZE_LIMIT_MB * 1024 * 1024) {
-              throw new Error(`${file.name} exceeds ${FILE_SIZE_LIMIT_MB}MB limit.`);
-            }
-          }
-          await submitFilesToBackend(Array.from(fileInput.files), notes);
-          saveSubmissionLocally('file', { files: Array.from(fileInput.files).map(f => f.name), notes });
-          showStatus('success', `${fileInput.files.length} file(s) submitted successfully!`);
-          fileInput.value = '';
-          updateFileListDisplay();
-          this.reset();
-        } catch (err) {
-          showStatus('error', err.message);
-        } finally {
-          submitBtn.disabled = false;
-        }
-      });
-    }
-  }
-
-  /**
-   * ============================================
-   * MASTER INITIALIZATION
-   * ============================================
-   */
-  function initializePage() {
-    // Lesson player setup
-    initLessonPlayer();
-    expandCurrentSprint();
-    syncCompletionUI();
-    setupSyncListeners();
-    
-    // Mobile enhancements
-    setupMobileModal();
-    window.addEventListener('resize', () => setupMobileModal());
-    
-    // Assignment submission
-    setupSubmissionForms();
-    
-    // File upload handling
-    const fileUploadArea = document.getElementById('file-upload-area');
-    const fileInput = document.getElementById('file-input');
-    if (fileUploadArea && fileInput) {
-      fileUploadArea.addEventListener('click', () => fileInput.click());
-      fileUploadArea.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.add('dragover');
-      });
-      fileUploadArea.addEventListener('dragleave', () => {
-        fileUploadArea.classList.remove('dragover');
-      });
-      fileUploadArea.addEventListener('drop', (e) => {
-        e.preventDefault();
-        fileUploadArea.classList.remove('dragover');
-        fileInput.files = e.dataTransfer.files;
-        updateFileListDisplay();
-      });
-      fileInput.addEventListener('change', () => updateFileListDisplay());
-    }
-  }
-
-  document.addEventListener('DOMContentLoaded', initializePage);
-</script>
-
+{% include course-document-player.html %}
 {% else %}
+{% if page.topics_context and page.topics_nav_in_content != true %}
+{% include projects/topics/topics-document-nav.html %}
+<script type="module" src="{{ '/assets/js/projects/topics/document.js' | relative_url }}"></script>
+{% endif %}
 {% comment %}
 === REGULAR BLOG POST LAYOUT FOR NON-CSP POSTS ===
 {% endcomment %}
@@ -824,6 +97,59 @@ Check if this is a course lesson and determine which course context to use
     margin-bottom: 1rem;
   }
 
+  .post-header-actions {
+    margin-top: 0.85rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .post-primary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.78rem;
+    border: 1px solid #1d4ed8;
+    border-radius: 999px;
+    background: #2563eb;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 0.83rem;
+    font-weight: 700;
+    line-height: 1.2;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+
+  .post-primary-link:hover,
+  .post-primary-link:focus-visible {
+    background: #1d4ed8;
+    border-color: #1e40af;
+    color: #ffffff;
+  }
+
+  .post-secondary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid #d1d5db;
+    border-radius: 999px;
+    background: #f8fafc;
+    color: #374151;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .post-secondary-link:hover,
+  .post-secondary-link:focus-visible {
+    background: #eef2f7;
+    border-color: #9ca3af;
+    color: #1f2937;
+  }
+
   .post-header a.category-tags-link {
     margin-right: 0.3rem;
   }
@@ -850,234 +176,11 @@ Check if this is a course lesson and determine which course context to use
     border-top: 1px solid #ddd;
   }
 
-  /* Assignment Submission Widget */
-  .assignment-submission {
-    margin-top: 48px;
-    padding: 24px;
-    background: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 12px;
-  }
-
-  .assignment-submission h3 {
-    color: #333;
-    font-size: 1.25rem;
-    margin: 0 0 16px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .assignment-submission-icon {
-    color: #2563eb;
-  }
-
-  .submission-options {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-  }
-
-  .submission-tab {
-    padding: 8px 16px;
-    background: white;
-    border: 1px solid #d0d0d0;
-    border-radius: 6px;
-    color: #555;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-
-  .submission-tab:hover {
-    background: #f0f0f0;
-    color: #333;
-  }
-
-  .submission-tab.active {
-    background: #2563eb;
-    color: white;
-    border-color: #2563eb;
-  }
-
-  .submission-form {
-    display: none;
-  }
-
-  .submission-form.active {
-    display: block;
-  }
-
-  .form-group {
-    margin-bottom: 16px;
-  }
-
-  .form-group label {
-    display: block;
-    color: #333;
-    font-size: 14px;
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-
-  .form-group input[type="text"],
-  .form-group input[type="url"],
-  .form-group textarea {
-    width: 100%;
-    padding: 10px 12px;
-    background: white;
-    border: 1px solid #d0d0d0;
-    border-radius: 6px;
-    color: #333;
-    font-size: 14px;
-    font-family: inherit;
-  }
-
-  .form-group input:focus,
-  .form-group textarea:focus {
-    outline: none;
-    border-color: #2563eb;
-  }
-
-  .form-group textarea {
-    min-height: 100px;
-    resize: vertical;
-  }
-
-  .file-upload-area {
-    border: 2px dashed #d0d0d0;
-    border-radius: 8px;
-    padding: 32px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    background: white;
-  }
-
-  .file-upload-area:hover {
-    border-color: #2563eb;
-    background: #f0f7ff;
-  }
-
-  .file-upload-area.dragover {
-    border-color: #2563eb;
-    background: #f0f7ff;
-  }
-
-  .file-upload-icon {
-    font-size: 48px;
-    color: #2563eb;
-    margin-bottom: 12px;
-  }
-
-  .file-upload-text {
-    color: #555;
-    margin-bottom: 8px;
-  }
-
-  .file-upload-hint {
-    color: #999;
-    font-size: 12px;
-  }
-
-  .file-list {
-    margin-top: 16px;
-  }
-
-  .file-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px;
-    background: white;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    margin-bottom: 8px;
-  }
-
-  .file-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .file-name {
-    color: #333;
-    font-size: 14px;
-  }
-
-  .file-size {
-    color: #999;
-    font-size: 12px;
-  }
-
-  .remove-file {
-    background: transparent;
-    border: none;
-    color: #999;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: all 0.2s;
-  }
-
-  .remove-file:hover {
-    background: #fee;
-    color: #dc2626;
-  }
-
-  .submit-btn {
-    padding: 12px 24px;
-    background: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.2s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .submit-btn:hover {
-    background: #1d4ed8;
-  }
-
-  .submit-btn:disabled {
-    background: #d0d0d0;
-    color: #999;
-    cursor: not-allowed;
-  }
-
-  .submission-status {
-    margin-top: 16px;
-    padding: 12px;
-    border-radius: 6px;
-    display: none;
-  }
-
-  .submission-status.success {
-    display: block;
-    background: #dbeafe;
-    border: 1px solid #2563eb;
-    color: #1e40af;
-  }
-
-  .submission-status.error {
-    display: block;
-    background: #fee2e2;
-    border: 1px solid #dc2626;
-    color: #991b1b;
-  }
-
-  .submission-status.loading {
-    display: block;
-    background: #dbeafe;
-    border: 1px solid #3b82f6;
-    color: #1d4ed8;
-  }
+  /* Assignment submission widget styling (self-assessment, forms, file
+     upload, code-runner summary, status) lives in the sitewide
+     _sass/open-coding/lesson-player.scss now, shared with the other layout
+     branch, so both respect the user theme system consistently instead of
+     maintaining two hardcoded copies. */
 </style>
 
 <article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting">
@@ -1097,7 +200,7 @@ Check if this is a course lesson and determine which course context to use
     Categories:
     {% for category in page.categories %}
     {%- assign prefix = category | slice: 0 -%}
-    <a class="category-tags-link" href="{{site.baseurl}}/search/#{{category|slugize}}">{{category}}</a>
+    <a class="category-tags-link" href="{{ '/topics/' | relative_url }}?category={{ category | downcase | url_encode }}">{{ category | escape }}</a>
     {% unless forloop.last %}&nbsp;{% endunless %}
     {% endfor %}
     {% endif %}
@@ -1154,6 +257,13 @@ Check if this is a course lesson and determine which course context to use
     <p class="page-description">{{ page.description }}</p>
     {%- endif -%}
     {%- endif -%}
+    {%- comment -%} Starts a /student/calendar event linked to this doc; the calendar reads ?doc= and ?title= {%- endcomment -%}
+    <p>
+      <a class="ocs__btn ocs__btn--icon small accent" href="{{ '/student/calendar' | relative_url }}?doc={{ page.url | relative_url | url_encode }}&amp;title={{ page.title | url_encode }}" data-add-doc-to-calendar>
+        <i class="fas fa-calendar-plus" aria-hidden="true"></i>
+        Add to Calendar
+      </a>
+    </p>
   </header>
 
   <div class="post-content e-content" itemprop="articleBody">
@@ -1167,50 +277,140 @@ Check if this is a course lesson and determine which course context to use
 
     {{ content }}
 
+    {% if page.grading_modules %}
+    {% comment %} Grading/submission module at the bottom of the content (non-course-lesson pages) {% endcomment %}
+    {% include grading_modules.html %}
+    {% endif %}
+
     {% if page.assignment %}
+    {% assign submission_type = page.assignment_submission_type | default: "file" | downcase %}
     <div class="assignment-submission">
       <h3>
-        <i class="fas fa-upload assignment-submission-icon"></i>
+        <i class="fa-solid fa-upload assignment-submission-icon"></i>
         Submit Assignment
       </h3>
 
-      <div class="submission-options">
-        <button class="submission-tab" onclick="switchSubmissionType('link')">
-          <i class="fas fa-link"></i> Link Submission
-        </button>
-        <button class="submission-tab" onclick="switchSubmissionType('file')">
-          <i class="fas fa-file-upload"></i> File Upload
-        </button>
+      {% comment %}
+        Self-assessment is paused while it is reworked; the matching JS checks
+        below are commented out. Remove this comment block to bring it back.
+      <div class="self-assessment" id="self-assessment-blog">
+        <h4 class="self-assessment-title">
+          <i class="fas fa-clipboard-check"></i>
+          Self-Assessment
+        </h4>
+        <p class="self-assessment-hint">Rate your work on this assignment, then add a short reflection. All 5 fields are required before you can submit.</p>
+
+        <fieldset class="rating-group" data-field="technicalExcellence">
+          <legend class="rating-label">Technical Excellence</legend>
+          <p class="rating-question">Rate the technical quality of your work on this assignment — your use of tools, problem-solving, and technical growth.</p>
+          <div class="rating-scale" role="radiogroup" aria-label="Technical Excellence rating">
+            <label class="rating-option"><input type="radio" name="sa-technicalExcellence-blog" value="1"><span>1</span></label>
+            <label class="rating-option"><input type="radio" name="sa-technicalExcellence-blog" value="2"><span>2</span></label>
+            <label class="rating-option"><input type="radio" name="sa-technicalExcellence-blog" value="3"><span>3</span></label>
+            <label class="rating-option"><input type="radio" name="sa-technicalExcellence-blog" value="4"><span>4</span></label>
+            <label class="rating-option"><input type="radio" name="sa-technicalExcellence-blog" value="5"><span>5</span></label>
+          </div>
+          <div class="rating-scale-hint">1 Explore &middot; 2 Understand &middot; 3 Apply &middot; 4 Analyze/Evaluate &middot; 5 Create/Extend</div>
+        </fieldset>
+
+        <fieldset class="rating-group" data-field="communication">
+          <legend class="rating-label">Communication</legend>
+          <p class="rating-question">Rate how clearly you communicated your work and process — explanations, documentation, and collaboration or help-seeking.</p>
+          <div class="rating-scale" role="radiogroup" aria-label="Communication rating">
+            <label class="rating-option"><input type="radio" name="sa-communication-blog" value="1"><span>1</span></label>
+            <label class="rating-option"><input type="radio" name="sa-communication-blog" value="2"><span>2</span></label>
+            <label class="rating-option"><input type="radio" name="sa-communication-blog" value="3"><span>3</span></label>
+            <label class="rating-option"><input type="radio" name="sa-communication-blog" value="4"><span>4</span></label>
+            <label class="rating-option"><input type="radio" name="sa-communication-blog" value="5"><span>5</span></label>
+          </div>
+          <div class="rating-scale-hint">1 Beginning &middot; 2 Developing &middot; 3 Consistent &middot; 4 Strong &middot; 5 Model</div>
+        </fieldset>
+
+        <fieldset class="rating-group" data-field="workHabits">
+          <legend class="rating-label">Work Habits</legend>
+          <p class="rating-question">Rate your work habits on this assignment — time management, persistence, responsibility, and follow-through.</p>
+          <div class="rating-scale" role="radiogroup" aria-label="Work Habits rating">
+            <label class="rating-option"><input type="radio" name="sa-workHabits-blog" value="1"><span>1</span></label>
+            <label class="rating-option"><input type="radio" name="sa-workHabits-blog" value="2"><span>2</span></label>
+            <label class="rating-option"><input type="radio" name="sa-workHabits-blog" value="3"><span>3</span></label>
+            <label class="rating-option"><input type="radio" name="sa-workHabits-blog" value="4"><span>4</span></label>
+            <label class="rating-option"><input type="radio" name="sa-workHabits-blog" value="5"><span>5</span></label>
+          </div>
+          <div class="rating-scale-hint">1 Beginning &middot; 2 Developing &middot; 3 Consistent &middot; 4 Strong &middot; 5 Model</div>
+        </fieldset>
+
+        <fieldset class="rating-group" data-field="aiOrchestration">
+          <legend class="rating-label">AI Orchestration</legend>
+          <p class="rating-question">Rate how effectively you used AI tools to support your work — prompting, verifying, extending, or accelerating your development process.</p>
+          <div class="rating-scale" role="radiogroup" aria-label="AI Orchestration rating">
+            <label class="rating-option"><input type="radio" name="sa-aiOrchestration-blog" value="1"><span>1</span></label>
+            <label class="rating-option"><input type="radio" name="sa-aiOrchestration-blog" value="2"><span>2</span></label>
+            <label class="rating-option"><input type="radio" name="sa-aiOrchestration-blog" value="3"><span>3</span></label>
+            <label class="rating-option"><input type="radio" name="sa-aiOrchestration-blog" value="4"><span>4</span></label>
+            <label class="rating-option"><input type="radio" name="sa-aiOrchestration-blog" value="5"><span>5</span></label>
+          </div>
+          <div class="rating-scale-hint">1 Explore &middot; 2 Understand &middot; 3 Apply &middot; 4 Analyze/Evaluate &middot; 5 Create/Extend</div>
+        </fieldset>
+
+        <div class="form-group self-assessment-reflection">
+          <label for="self-assessment-reflection-blog">Reflection</label>
+          <textarea id="self-assessment-reflection-blog" placeholder="In a few sentences, describe what you learned, struggled with, or accomplished on this assignment. Include one specific example."></textarea>
+        </div>
       </div>
+      {% endcomment %}
 
-
-      <!-- Link Submission Form -->
-      <form class="submission-form" id="link-form-blog">
+      {% if submission_type == "link" or submission_type == "github_issue" %}
+      {% if submission_type == "github_issue" %}
+        {% assign link_label = "GitHub Issue Link" %}
+        {% assign link_placeholder = "https://github.com/owner/repo/issues/123" %}
+      {% else %}
+        {% assign link_label = "Submission Link" %}
+        {% assign link_placeholder = "https://..." %}
+      {% endif %}
+      <form class="submission-form active" id="link-form-blog">
         <div class="form-group">
-          <label for="submission-link-blog">Submission Link</label>
-          <input type="url" id="submission-link-blog" placeholder="https://..." required>
+          <label for="submission-link-blog">{{ link_label }}</label>
+          <input type="url" id="submission-link-blog" placeholder="{{ link_placeholder }}" required>
+          {% if submission_type == "github_issue" %}
+          <p class="form-hint" style="font-size:0.85rem;color:#9ca3af;margin-top:6px;">Must be a public GitHub issue (github.com/owner/repo/issues/N) — it will be validated and reviewed automatically.</p>
+          {% endif %}
         </div>
         <div class="form-group">
           <label for="link-description-blog">Description</label>
           <textarea id="link-description-blog" placeholder="Describe what you're submitting..." required></textarea>
         </div>
-        <button type="submit" class="submit-btn">
-          <i class="fas fa-check"></i>
+        <button type="submit" class="ocs__btn ocs__btn--icon accent fill">
+          <i class="fa-solid fa-check"></i>
           Submit Link
         </button>
       </form>
-
-      <!-- File Upload Form -->
-      <form class="submission-form" id="file-form-blog">
+      {% elsif submission_type == "code" %}
+      <form class="submission-form active" id="code-form-blog">
+        <div class="form-group">
+          <p class="form-hint">This submits the code from this lesson's code runner(s) below as a Gist for automatic review. Save each runner with its 💾 button before submitting.</p>
+          <p id="code-runner-count-blog"></p>
+          <ul class="code-runner-summary" id="code-runner-summary-blog"></ul>
+        </div>
+        <div class="form-group">
+          <label for="code-notes-blog">Notes (Optional)</label>
+          <textarea id="code-notes-blog" placeholder="Add any additional comments..."></textarea>
+        </div>
+        <button type="submit" class="ocs__btn ocs__btn--icon accent fill" id="code-submit-btn-blog">
+          <i class="fas fa-check"></i>
+          Submit Code
+        </button>
+      </form>
+      {% else %}
+      <form class="submission-form active" id="file-form-blog">
         <div class="form-group">
           <label>Upload Files</label>
           <div class="file-upload-area" id="file-upload-area-blog">
-            <input type="file" id="file-input-blog" multiple style="display: none;">
+            <input type="file" id="file-input-blog" multiple accept=".pdf,.zip,.png,.jpg,.jpeg,.gif,.doc,.docx,.txt,.ipynb,.java,.py,.js,.md" style="display: none;">
             <div class="file-upload-icon">
-              <i class="fas fa-cloud-upload-alt"></i>
+              <i class="fa-solid fa-cloud-upload-alt"></i>
             </div>
             <div class="file-upload-text">Click to upload or drag and drop</div>
-            <div class="file-upload-hint">PDF, ZIP, images, or documents (Max 10MB per file)</div>
+            <div class="file-upload-hint">PDF, ZIP, images, documents, Jupyter notebooks (.ipynb), or code files (.java, .py, .js, .md) (Max 10MB per file)</div>
           </div>
           <div class="file-list" id="file-list-blog"></div>
         </div>
@@ -1218,18 +418,130 @@ Check if this is a course lesson and determine which course context to use
           <label for="file-notes-blog">Notes (Optional)</label>
           <textarea id="file-notes-blog" placeholder="Add any additional comments..."></textarea>
         </div>
-        <button type="submit" class="submit-btn" id="file-submit-btn-blog" disabled>
-          <i class="fas fa-check"></i>
+        <button type="submit" class="ocs__btn ocs__btn--icon accent fill" id="file-submit-btn-blog" disabled>
+          <i class="fa-solid fa-check"></i>
           Submit Files
         </button>
       </form>
+      {% endif %}
 
       <div class="submission-status" id="submission-status-blog"></div>
     </div>
+    <p style="margin-top: 12px; color: #6b7280; font-size: 0.95rem;">
+      Need to update a submission later? Open the <a href="{{ site.baseurl }}/submissions" style="color: #2563eb; text-decoration: underline;">submissions dashboard</a>.
+    </p>
 
     <script>
-      const ASSIGNMENT_ID = {{ page.assignment_id | default: 'null' }};
-      const ASSIGNMENT_NAME = {{ page.assignment_name | default: 'null' | jsonify }};
+      const FRONTMATTER_ASSIGNMENT_ID_BLOG = {{ page.assignment_id | default: 'null' }};
+      const FRONTMATTER_ASSIGNMENT_NAME_BLOG = {{ page.assignment_name | default: nil | jsonify }};
+      const SUBMISSION_TYPE_BLOG = {{ page.assignment_submission_type | default: "file" | downcase | jsonify }};
+      const GITHUB_ISSUE_URL_PATTERN_BLOG = /^https?:\/\/github\.com\/[^/]+\/[^/#?]+\/issues\/\d+\/?$/i;
+      // This branch (pages whose frontmatter doesn't resolve a course/week - see
+      // is_course_lesson at the top of this layout) never had a working auto-create
+      // implementation: ensureAssignmentIdBlog() below only ever fell back to a static
+      // frontmatter assignment_id or threw, because the real implementation lived
+      // exclusively in the other branch's script, which never renders here. A course
+      // was never actually required by the backend - this was a frontend gap where
+      // the "blog" layout's assignment support was always a stub.
+      const CURRENT_LESSON_ID_BLOG = {{ page.topics_original_url | default: page.url | jsonify }};
+      let CURRENT_ASSIGNMENT_ID_BLOG = FRONTMATTER_ASSIGNMENT_ID_BLOG;
+      let CURRENT_ASSIGNMENT_NAME_BLOG = FRONTMATTER_ASSIGNMENT_NAME_BLOG;
+      let ASSIGNMENT_RESOLVE_PROMISE_BLOG = null;
+
+      async function autoCreateAssignmentIfNeededBlog() {
+        const hasAssignment = {{ page.assignment | default: false }};
+        if (!hasAssignment) {
+          return; // Not an assignment page
+        }
+
+        try {
+          // Call the Spring API to auto-create assignment
+          // This endpoint allows any authenticated user (student, person, teacher, admin)
+          const createRes = await fetch(`${javaURI}/api/assignments/auto-create`, {
+            ...fetchOptions,
+            method: 'POST',
+            headers: {
+              ...fetchOptions.headers,
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+              name: {{ page.title | jsonify }},
+              contentUrl: CURRENT_LESSON_ID_BLOG.replace(/^\/+|\/+$/g, ''),
+              description: {{ page.description | default: "" | jsonify }},
+              assignmentType: SUBMISSION_TYPE_BLOG,
+              pageContent: {{ page.content | strip_html | normalize_whitespace | truncate: 8000 | jsonify }}
+            })
+          });
+
+          if (createRes.ok) {
+            const result = await createRes.json();
+            CURRENT_ASSIGNMENT_ID_BLOG = result.id;
+            CURRENT_ASSIGNMENT_NAME_BLOG = result.name;
+            window.ASSIGNMENT_ID = result.id;
+            window.ASSIGNMENT_NAME = result.name;
+
+            if (createRes.status === 201) {
+              console.log('✓ Assignment auto-created with ID:', result.id);
+            } else if (createRes.status === 200) {
+              console.log('ℹ Assignment already exists with ID:', result.id, '- reusing for this session');
+            } else {
+              console.log('Assignment resolved with ID:', result.id);
+            }
+          } else if (createRes.status === 401 || createRes.status === 403) {
+            console.warn('Assignment creation requires an active Spring login session. Please log in and refresh the page.');
+          } else if (createRes.status === 400) {
+            const error = await createRes.json();
+            console.error('Bad request for auto-create assignment:', error.error);
+          } else {
+            console.error('Failed to auto-create assignment:', createRes.status, createRes.statusText);
+          }
+        } catch (error) {
+          console.error('Error auto-creating assignment:', error);
+        }
+      }
+
+      // window.javaURI/fetchOptions come from a module script further down the page,
+      // which (like all module scripts) runs deferred - only after DOMContentLoaded is
+      // it guaranteed to have executed, matching the pattern already used below for
+      // renderCodeRunnerSummaryBlog.
+      document.addEventListener('DOMContentLoaded', autoCreateAssignmentIfNeededBlog);
+
+      function renderCodeRunnerSummaryBlog() {
+        window.mountSubmissionSummary(document.getElementById('code-runner-count-blog'),
+          document.getElementById('code-runner-summary-blog'));
+      }
+
+      async function ensureAssignmentIdBlog() {
+        const hasAssignment = {{ page.assignment | default: false }};
+        if (!hasAssignment) {
+          if (!CURRENT_ASSIGNMENT_ID_BLOG) throw new Error("Assignment ID not configured.");
+          return CURRENT_ASSIGNMENT_ID_BLOG;
+        }
+
+        // Always resolve against the backend so uploads/submissions target the real
+        // assignment ID, not only a static frontmatter one. DOMContentLoaded already
+        // kicks this off once; a submit attempt that races ahead of that (or a legacy
+        // page with no listener yet attached) starts it here instead of failing.
+        if (!ASSIGNMENT_RESOLVE_PROMISE_BLOG) {
+          ASSIGNMENT_RESOLVE_PROMISE_BLOG = autoCreateAssignmentIfNeededBlog();
+        }
+        await ASSIGNMENT_RESOLVE_PROMISE_BLOG;
+
+        if (!CURRENT_ASSIGNMENT_ID_BLOG) {
+          throw new Error('Could not resolve backend assignment ID. Please log in and refresh.');
+        }
+        return CURRENT_ASSIGNMENT_ID_BLOG;
+      }
+
+      function currentAssignmentNameBlog() {
+        if (typeof window.ASSIGNMENT_NAME === 'string' && window.ASSIGNMENT_NAME.trim()) {
+          return window.ASSIGNMENT_NAME;
+        }
+        if (typeof FRONTMATTER_ASSIGNMENT_NAME_BLOG === 'string' && FRONTMATTER_ASSIGNMENT_NAME_BLOG.trim()) {
+          return FRONTMATTER_ASSIGNMENT_NAME_BLOG;
+        }
+        return null;
+      }
 
       // Submission type switching
       function switchSubmissionType(type) {
@@ -1295,14 +607,14 @@ Check if this is a course lesson and determine which course context to use
           fileItem.className = 'file-item';
           fileItem.innerHTML = `
               <div class="file-info">
-                <i class="fas fa-file"></i>
+                <i class="fa-solid fa-file"></i>
                 <div>
                   <div class="file-name">${file.name}</div>
                   <div class="file-size">${formatFileSizeBlog(file.size)}</div>
                 </div>
               </div>
               <button type="button" class="remove-file" onclick="removeFileBlog(${index})">
-                <i class="fas fa-times"></i>
+                <i class="fa-solid fa-times"></i>
               </button>
             `;
           fileListBlog.appendChild(fileItem);
@@ -1323,6 +635,64 @@ Check if this is a course lesson and determine which course context to use
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
       }
 
+      // Self-assessment: collect, validate & reset (mirrors the course-lesson
+      // branch's setupSelfAssessmentRatings/getSelfAssessmentData above — this
+      // branch renders its own markup with -blog suffixed ids/names, so it needs
+      // its own copy rather than sharing functions across branches that never
+      // render on the same page).
+      const SELF_ASSESSMENT_RATING_FIELDS_BLOG = {
+        technicalExcellence: 'Technical Excellence',
+        communication: 'Communication',
+        workHabits: 'Work Habits',
+        aiOrchestration: 'AI Orchestration'
+      };
+
+      function getSelfAssessmentDataBlog() {
+        const data = {};
+        for (const field of Object.keys(SELF_ASSESSMENT_RATING_FIELDS_BLOG)) {
+          const checked = document.querySelector(`input[name="sa-${field}-blog"]:checked`);
+          data[field] = checked ? parseInt(checked.value, 10) : null;
+        }
+        data.selfAssessmentReflection = document.getElementById('self-assessment-reflection-blog')?.value.trim() || '';
+        return data;
+      }
+
+      function validateSelfAssessmentBlog(data) {
+        for (const [field, label] of Object.entries(SELF_ASSESSMENT_RATING_FIELDS_BLOG)) {
+          const value = data[field];
+          if (!Number.isInteger(value) || value < 1 || value > 5) {
+            return `Please rate "${label}" before submitting.`;
+          }
+        }
+        if (!data.selfAssessmentReflection) {
+          return 'Please add a short self-assessment reflection before submitting.';
+        }
+        return null;
+      }
+
+      function resetSelfAssessmentBlog() {
+        document.querySelectorAll('#self-assessment-blog input[type="radio"]').forEach(input => {
+          input.checked = false;
+          input.closest('.rating-option')?.classList.remove('selected');
+        });
+        const reflection = document.getElementById('self-assessment-reflection-blog');
+        if (reflection) reflection.value = '';
+      }
+
+      function setupSelfAssessmentRatingsBlog() {
+        const container = document.getElementById('self-assessment-blog');
+        if (!container) return;
+        container.addEventListener('change', (e) => {
+          const input = e.target;
+          if (input.tagName !== 'INPUT' || input.type !== 'radio') return;
+          const group = input.closest('.rating-scale');
+          if (!group) return;
+          group.querySelectorAll('.rating-option').forEach(opt => opt.classList.remove('selected'));
+          input.closest('.rating-option')?.classList.add('selected');
+        });
+      }
+      setupSelfAssessmentRatingsBlog();
+
       // Helper: resolve current user's UID and numeric person ID
       async function resolveCurrentUserBlog() {
         const uidRes = await fetch(`${pythonURI}/api/id`, { ...fetchOptions });
@@ -1335,128 +705,251 @@ Check if this is a course lesson and determine which course context to use
       }
 
       // Link submission — POST to Spring API
-      document.getElementById('link-form-blog').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (!ASSIGNMENT_ID) {
-          showStatusBlog('error', "Assignment ID not configured. Add assignment_id to this page's frontmatter.");
-          return;
-        }
-        const link = document.getElementById('submission-link-blog').value.trim();
-        const description = document.getElementById('link-description-blog').value.trim();
-        const btn = this.querySelector('button[type="submit"]');
-        btn.disabled = true;
-        showStatusBlog('loading', 'Submitting...');
-        try {
-          const { uid, personId } = await resolveCurrentUserBlog();
-          const content = { type: 'link', url: link, notes: description };
-          const res = await fetch(`${javaURI}/api/submissions/${ASSIGNMENT_ID}`, {
-            ...fetchOptions,
-            method: 'POST',
-            body: JSON.stringify({
-              assignmentId: ASSIGNMENT_ID,
-              submitterId: personId,
-              isGroupSubmission: false,
-              content,
-              comment: description,
-              isLate: false
-            })
-          });
-          if (!res.ok) {
-            const e = await res.json().catch(() => ({}));
-            throw new Error(e.error || res.statusText);
+      const linkFormBlog = document.getElementById('link-form-blog');
+      if (linkFormBlog) {
+        linkFormBlog.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const link = document.getElementById('submission-link-blog').value.trim();
+          const description = document.getElementById('link-description-blog').value.trim();
+          const btn = this.querySelector('button[type="submit"]');
+          if (SUBMISSION_TYPE_BLOG === 'github_issue' && !GITHUB_ISSUE_URL_PATTERN_BLOG.test(link)) {
+            showStatusBlog('error', 'That is not a valid GitHub issue link (expected github.com/owner/repo/issues/N).');
+            return;
           }
-          // Dual-write to EshikaP1's grades system
-          const assignmentLabel = (typeof ASSIGNMENT_NAME === 'string' && ASSIGNMENT_NAME) ? ASSIGNMENT_NAME : String(ASSIGNMENT_ID);
-          await fetch(`${javaURI}/api/grades`, {
-            ...fetchOptions,
-            method: 'POST',
-            body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
-          }).catch(() => {});
-          showStatusBlog('success', 'Link submitted successfully!');
-          this.reset();
-        } catch (err) {
-          showStatusBlog('error', err.message);
-        } finally {
-          btn.disabled = false;
-        }
-      });
-
-      // File submission — POST to Spring file upload API
-      document.getElementById('file-form-blog').addEventListener('submit', async function (e) {
-        e.preventDefault();
-        if (!ASSIGNMENT_ID) {
-          showStatusBlog('error', "Assignment ID not configured. Add assignment_id to this page's frontmatter.");
-          return;
-        }
-        if (selectedFilesBlog.length === 0) {
-          showStatusBlog('error', 'Please select at least one file.');
-          return;
-        }
-        const notes = document.getElementById('file-notes-blog').value.trim();
-        const btn = document.getElementById('file-submit-btn-blog');
-        btn.disabled = true;
-        showStatusBlog('loading', 'Uploading...');
-        try {
-          const { uid, personId } = await resolveCurrentUserBlog();
-          // Resolve assignment name for the file upload endpoint
-          let assignmentName = (typeof ASSIGNMENT_NAME === 'string' && ASSIGNMENT_NAME) ? ASSIGNMENT_NAME : null;
-          if (!assignmentName) {
-            const nameRes = await fetch(`${javaURI}/api/assignments/${ASSIGNMENT_ID}`, { ...fetchOptions });
-            if (!nameRes.ok) throw new Error('Assignment not found on server.');
-            assignmentName = await nameRes.text();
-          }
-          for (const file of selectedFilesBlog) {
-            if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name} exceeds 10MB limit.`);
-            const content = { type: 'file', filename: file.name, notes: notes || '' };
-            const fd = new FormData();
-            fd.append('assignmentName', assignmentName);
-            fd.append('userId', personId);
-            fd.append('username', uid);
-            fd.append('file', file);
-            if (notes) fd.append('notes', notes);
-            const r = await fetch(`${javaURI}/api/assignment-submissions/upload`, {
+          const selfAssessment = getSelfAssessmentDataBlog();
+          // Self-assessment is paused, so its required-field check is off for now.
+          // const selfAssessmentError = validateSelfAssessmentBlog(selfAssessment);
+          // if (selfAssessmentError) {
+          //   showStatusBlog('error', selfAssessmentError);
+          //   return;
+          // }
+          btn.disabled = true;
+          showStatusBlog('loading', 'Submitting...');
+          try {
+            const assignmentId = await ensureAssignmentIdBlog();
+            const { uid, personId } = await resolveCurrentUserBlog();
+            const content = { type: SUBMISSION_TYPE_BLOG === 'github_issue' ? 'github_issue' : 'link', url: link, notes: description };
+            const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
+              ...fetchOptions,
               method: 'POST',
-              mode: fetchOptions.mode,
-              credentials: fetchOptions.credentials,
-              headers: { 'X-Origin': 'client' },
-              body: fd
+              body: JSON.stringify({
+                assignmentId: assignmentId,
+                submitterId: personId,
+                isGroupSubmission: false,
+                content,
+                comment: description,
+                isLate: false,
+                technicalExcellence: selfAssessment.technicalExcellence,
+                communication: selfAssessment.communication,
+                workHabits: selfAssessment.workHabits,
+                aiOrchestration: selfAssessment.aiOrchestration,
+                selfAssessmentReflection: selfAssessment.selfAssessmentReflection
+              })
             });
-            if (!r.ok) {
-              const e = await r.json().catch(() => ({}));
-              throw new Error(`Upload failed for ${file.name}: ` + (e.error || r.statusText));
+            if (!res.ok) {
+              const e = await res.json().catch(() => ({}));
+              throw new Error(e.error || res.statusText);
             }
             // Dual-write to EshikaP1's grades system
-            const assignmentLabel = (typeof ASSIGNMENT_NAME === 'string' && ASSIGNMENT_NAME) ? ASSIGNMENT_NAME : String(ASSIGNMENT_ID);
+            const assignmentName = currentAssignmentNameBlog();
+            const assignmentLabel = assignmentName ? assignmentName : String(assignmentId);
             await fetch(`${javaURI}/api/grades`, {
               ...fetchOptions,
               method: 'POST',
-              body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: content, submittedAt: new Date().toISOString() })
+              body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
             }).catch(() => {});
+            showStatusBlog('success', 'Link submitted successfully!');
+            this.reset();
+            resetSelfAssessmentBlog();
+          } catch (err) {
+            showStatusBlog('error', err.message);
+          } finally {
+            btn.disabled = false;
           }
-          showStatusBlog('success', `${selectedFilesBlog.length} file(s) submitted successfully!`);
-          selectedFilesBlog = [];
-          updateFileListBlog();
-          this.reset();
-        } catch (err) {
-          showStatusBlog('error', err.message);
-        } finally {
-          btn.disabled = false;
-        }
-      });
+        });
+      }
 
-      function showStatusBlog(type, message) {
+      // File submission — POST to Spring file upload API
+      const fileFormBlog = document.getElementById('file-form-blog');
+      if (fileFormBlog) {
+        fileFormBlog.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          if (selectedFilesBlog.length === 0) {
+            showStatusBlog('error', 'Please select at least one file.');
+            return;
+          }
+          const notes = document.getElementById('file-notes-blog').value.trim();
+          const btn = document.getElementById('file-submit-btn-blog');
+          const selfAssessment = getSelfAssessmentDataBlog();
+          // Self-assessment is paused, so its required-field check is off for now.
+          // const selfAssessmentError = validateSelfAssessmentBlog(selfAssessment);
+          // if (selfAssessmentError) {
+          //   showStatusBlog('error', selfAssessmentError);
+          //   return;
+          // }
+          btn.disabled = true;
+          showStatusBlog('loading', 'Uploading...');
+          try {
+            const assignmentId = await ensureAssignmentIdBlog();
+            const { uid, personId } = await resolveCurrentUserBlog();
+            // Resolve assignment name for the file upload endpoint
+            let assignmentName = null;
+            const preferredName = currentAssignmentNameBlog();
+            if (typeof preferredName === 'string') {
+              const normalized = preferredName.trim().toLowerCase();
+              if (normalized && normalized !== 'null' && normalized !== 'undefined') {
+                assignmentName = preferredName;
+              }
+            }
+            if (!assignmentName) {
+              const nameRes = await fetch(`${javaURI}/api/assignments/${assignmentId}`, { ...fetchOptions });
+              if (!nameRes.ok) throw new Error('Assignment not found on server.');
+              assignmentName = await nameRes.text();
+            }
+            for (const file of selectedFilesBlog) {
+              if (file.size > 10 * 1024 * 1024) throw new Error(`${file.name} exceeds 10MB limit.`);
+              const content = { type: 'file', filename: file.name, notes: notes || '' };
+              const fd = new FormData();
+              fd.append('assignmentName', assignmentName);
+              fd.append('assignmentId', String(assignmentId));
+              fd.append('userId', personId);
+              fd.append('username', uid);
+              fd.append('file', file);
+              if (notes) fd.append('notes', notes);
+              // Skip unanswered fields: String(null) would send "null", which Spring cannot bind to an Integer.
+              for (const [field, value] of Object.entries(selfAssessment)) {
+                if (value !== null && value !== '') fd.append(field, String(value));
+              }
+              const r = await fetch(`${javaURI}/api/assignment-submissions/upload`, {
+                method: 'POST',
+                mode: fetchOptions.mode,
+                credentials: fetchOptions.credentials,
+                headers: { 'X-Origin': 'client' },
+                body: fd
+              });
+              if (!r.ok) {
+                const e = await r.json().catch(() => ({}));
+                throw new Error(`Upload failed for ${file.name}: ` + (e.error || r.statusText));
+              }
+              // Dual-write to EshikaP1's grades system
+              const assignmentNameForGrades = currentAssignmentNameBlog();
+              const assignmentLabel = assignmentNameForGrades ? assignmentNameForGrades : String(assignmentId);
+              await fetch(`${javaURI}/api/grades`, {
+                ...fetchOptions,
+                method: 'POST',
+                body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
+              }).catch(() => {});
+            }
+            showStatusBlog('success', `${selectedFilesBlog.length} file(s) submitted successfully!`);
+            selectedFilesBlog = [];
+            updateFileListBlog();
+            this.reset();
+            resetSelfAssessmentBlog();
+          } catch (err) {
+            showStatusBlog('error', err.message);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      }
+
+      // Code submission — bundled into a Gist, then POST to Spring API
+      const codeFormBlog = document.getElementById('code-form-blog');
+      if (codeFormBlog) {
+        // The submission helpers come from a module script further down the page, which
+        // (like all module scripts) runs deferred - only after DOMContentLoaded is it
+        // guaranteed to have executed, so the summary render waits for that event too.
+        document.addEventListener('DOMContentLoaded', renderCodeRunnerSummaryBlog);
+        codeFormBlog.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const notes = document.getElementById('code-notes-blog')?.value?.trim() || '';
+          const btn = this.querySelector('button[type="submit"]');
+          const error = window.submissionError();
+          if (error) {
+            showStatusBlog('error', error);
+            return;
+          }
+          const files = window.readRunners({ selectedOnly: true });
+          const manifest = { kinds: window.readRunnerKinds({ selectedOnly: true }), runners: window.runnerSelectionSummary() };
+          const selfAssessment = getSelfAssessmentDataBlog();
+          // Self-assessment is paused, so its required-field check is off for now.
+          // const selfAssessmentError = validateSelfAssessmentBlog(selfAssessment);
+          // if (selfAssessmentError) {
+          //   showStatusBlog('error', selfAssessmentError);
+          //   return;
+          // }
+          btn.disabled = true;
+          showStatusBlog('loading', 'Checking login...');
+          let uid, personId;
+          try {
+            ({ uid, personId } = await resolveCurrentUserBlog());
+          } catch (err) {
+            showStatusBlog('error', 'Please log in to submit code.');
+            btn.disabled = false;
+            return;
+          }
+          showStatusBlog('loading', 'Creating Gist and submitting...');
+          try {
+            const assignmentId = await ensureAssignmentIdBlog();
+            const gistUrl = await window.exportToGist(files, { type: 'submission', description: notes || 'Code submission', manifest });
+            const content = { type: 'code', url: gistUrl, notes };
+            const res = await fetch(`${javaURI}/api/submissions/${assignmentId}`, {
+              ...fetchOptions,
+              method: 'POST',
+              body: JSON.stringify({
+                assignmentId: assignmentId,
+                submitterId: personId,
+                isGroupSubmission: false,
+                content,
+                comment: notes,
+                isLate: false,
+                technicalExcellence: selfAssessment.technicalExcellence,
+                communication: selfAssessment.communication,
+                workHabits: selfAssessment.workHabits,
+                aiOrchestration: selfAssessment.aiOrchestration,
+                selfAssessmentReflection: selfAssessment.selfAssessmentReflection
+              })
+            });
+            if (!res.ok) {
+              const e = await res.json().catch(() => ({}));
+              throw new Error(e.error || res.statusText);
+            }
+            const assignmentName = currentAssignmentNameBlog();
+            const assignmentLabel = assignmentName ? assignmentName : String(assignmentId);
+            await fetch(`${javaURI}/api/grades`, {
+              ...fetchOptions,
+              method: 'POST',
+              body: JSON.stringify({ uid, assignment: assignmentLabel, score: null, submission: { ...content, selfAssessment }, submittedAt: new Date().toISOString() })
+            }).catch(() => {});
+            showStatusBlog('success', 'Code submitted successfully!');
+            this.reset();
+            resetSelfAssessmentBlog();
+          } catch (err) {
+            showStatusBlog('error', err.message, err);
+          } finally {
+            btn.disabled = false;
+          }
+        });
+      }
+
+      function showStatusBlog(type, message, error) {
         const status = document.getElementById('submission-status-blog');
         const icon = type === 'success' ? 'check-circle' : type === 'loading' ? 'spinner fa-spin' : 'exclamation-circle';
         status.className = `submission-status ${type}`;
-        status.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
+        status.innerHTML = `<i class="fa-solid fa-${icon}"></i> ${message}`;
+        window.appendGistSettingsLink(status, error);
         status.style.display = 'block';
-        if (type !== 'loading') {
+        if (type !== 'loading' && !error?.settingsUrl) {
           setTimeout(() => {
             status.style.display = 'none';
           }, 5000);
         }
       }
     </script>
+    {% endif %}
+
+    {% if page.chat %}
+    {% include lesson_chat.html %}
     {% endif %}
   </div>
   {%- if page.comments -%}
@@ -1467,6 +960,22 @@ Check if this is a course lesson and determine which course context to use
   {%- endif -%}
   <a class="u-url" href="{{ page.url | relative_url }}" hidden></a>
 
+  <script type="module">
+    import { pythonURI, javaURI, fetchOptions } from '{{ site.baseurl }}/assets/js/api/config.js';
+    import { exportToGist } from '{{ site.baseurl }}/assets/js/gist.js';
+    import { appendGistSettingsLink } from '{{ site.baseurl }}/assets/js/gist-connection-errors.js';
+    import { readRunners, readRunnerKinds, runnerSelectionSummary } from '{{ site.baseurl }}/assets/js/runner-io.js';
+    import { mountSubmissionSummary, submissionError } from '{{ site.baseurl }}/assets/js/runner-submission.js';
+    window.pythonURI = pythonURI;
+    window.javaURI = javaURI;
+    window.fetchOptions = fetchOptions;
+    window.exportToGist = exportToGist;
+    window.appendGistSettingsLink = appendGistSettingsLink;
+    // Used by the blog code-submission form, which runs in a classic script.
+    Object.assign(window, { readRunners, readRunnerKinds, runnerSelectionSummary, mountSubmissionSummary, submissionError });
+  </script>
+  <script src="{{ site.baseurl }}/assets/js/lesson-completion.js"></script>
+  <script src="{{ site.baseurl }}/assets/js/lesson-completion-bigsix.js"></script>
 </article>
 
 {% endif %}

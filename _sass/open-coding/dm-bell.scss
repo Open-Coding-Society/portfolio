@@ -37,15 +37,19 @@
     display: none;
   }
 
+  &.has-unread {
+    background: color-mix(in srgb, $red 18%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, $red 35%, transparent);
+  }
+
   @media screen and (max-width: 600px) {
     margin-left: 4px;
   }
 }
 
-.dm-bell-badge {
-  position: absolute;
-  top: 0;
-  right: 0;
+// The red count pill. Shared with the microblog badges (microblog.scss), which
+// place it themselves, so where it sits stays in .dm-bell-badge below.
+%notification-badge {
   box-sizing: border-box;
   min-width: 18px;
   height: 18px;
@@ -62,4 +66,24 @@
   &[hidden] {
     display: none;
   }
+}
+
+.dm-bell-badge {
+  @extend %notification-badge;
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 2px solid var(--background);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.38);
+  animation: dm-notification-pop 320ms ease-out;
+}
+
+@keyframes dm-notification-pop {
+  0% { transform: scale(0.55); }
+  70% { transform: scale(1.16); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dm-bell-badge { animation: none; }
 }

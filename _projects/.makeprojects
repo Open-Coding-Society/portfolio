@@ -19,6 +19,8 @@ systems/blogs:dev
 systems/calendar
 systems/messages:dev
 systems/profile:dev
+systems/login:dev
 systems/topics:dev
+systems/scraper
 
 # === FLAT STRUCTURE (legacy/uncategorized) ===
