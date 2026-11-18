@@ -1,6 +1,6 @@
 ---
 layout: opencs
-title: My Good Brain
+title: Home
 permalink: /
 ---
 

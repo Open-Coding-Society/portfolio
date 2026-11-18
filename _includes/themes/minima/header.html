@@ -4,7 +4,8 @@
             {%- assign page_paths = site.minima.nav_pages | default: default_paths -%}
             {%- assign titles_size = site.pages | map: 'title' | join: '' | size -%}
             <a class="site-title" rel="author" href="{{ '/' | relative_url }}" data-value="{{ site.title | escape }}">
-                <img id="site-logo" src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1627273049439-2X3EKF2VE4WVLSJZ7ZJC/MGB+Logo.png?format=300w" alt="My Good Brain logo">
+                <img id="site-logo" src="https://images.squarespace-cdn.com/content/v1/5ffdf49e3d30d07ea498ac3b/1627273049439-2X3EKF2VE4WVLSJZ7ZJC/MGB+Logo.png?format=300w" alt="">
+                <span class="site-brand-name">My Good Brain</span>
             </a>
 
             {%- if titles_size > 0 -%}

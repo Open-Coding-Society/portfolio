@@ -135,8 +135,23 @@ button {
 .site-header #site-logo {
     width: 48px;
     height: 48px;
-    margin-right: 0.75rem;
+    margin-right: 0;
     object-fit: contain;
+}
+
+.site-header .site-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin: 0;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.site-header .site-brand-name {
+    color: #503774;
+    font-size: 1.05rem;
+    font-weight: 700;
 }
 
 .site-nav .trigger {
