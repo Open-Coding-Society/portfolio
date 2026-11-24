@@ -1,12 +1,7 @@
-// Checked boxes in the same filter are alternatives (Java or Python); the Topic and
-// Categories filters narrow each other (Java and Algorithms). `primary` lists the
-// Topic Filter values; every other checked value belongs to the Categories Filter.
-// With `match: 'and'`, every checked Topic Filter box is required (Java and Spring).
-export function filterGroups(categories, { primary = [], match = 'or' } = {}) {
-  const topics = categories.filter((category) => primary.includes(category));
-  const others = categories.filter((category) => !primary.includes(category));
-  const topicGroups = match === 'and' ? topics.map((topic) => [topic]) : [topics];
-  return [...topicGroups, others].filter((group) => group.length);
+// OR accepts any checked category; AND requires all checked categories.
+export function filterGroups(categories, { match = 'or' } = {}) {
+  if (!categories.length) return [];
+  return match === 'and' ? categories.map((category) => [category]) : [categories];
 }
 
 export function selectedDocuments(documents, categories, rankedIds = null, rule = {}) {
@@ -132,6 +127,34 @@ export function categoryCounts(documents) {
   documents.forEach((document) => document.categories.forEach((category) =>
     counts.set(category, (counts.get(category) || 0) + 1)));
   return counts;
+}
+
+export function categoriesByCount(categories, counts) {
+  return [...categories].sort((a, b) => (counts.get(b) || 0) - (counts.get(a) || 0));
+}
+
+export function showMoreCategory(count, selected) {
+  return count >= 5 || selected;
+}
+
+export function resultHeading(state, labels, count) {
+  const query = state.query.trim();
+  if (query) return `Results for “${query}” (${count})`;
+  const title = state.categories.length === 0 ? 'All topics' :
+    state.categories.length === 1 ? labels.get(state.categories[0]) || state.categories[0] : 'Filtered lessons';
+  return `${title} (${count})`;
+}
+
+export function createSearchIndex(lunr, documents) {
+  return lunr(function () {
+    this.ref('url');
+    this.field('title', { boost: 10 });
+    this.field('description', { boost: 3 });
+    this.field('content');
+    this.field('categories');
+    this.metadataWhitelist = ['position'];
+    documents.forEach((document) => this.add({ ...document, categories: document.labels.join(' ') }));
+  });
 }
 
 // Lesson titles name their unit: "1.01 Variables", "Unit 2 Quiz" or

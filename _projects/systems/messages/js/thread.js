@@ -8,11 +8,20 @@
 // reached through `richText`); an image pasted into the composer is attached like one
 // picked with the Image control or dropped on the composer.
 import { classifyDmEvent, classifyGroupEvent, dmMessage, groupMessage } from './messages-model.js';
-import { createMessageLog, fillText, withTexts } from './message-log.js';
-import { readImageFile, saveFile } from './dialogs.js';
+import { ChatCommands } from './chat-commands.js';
+import { CodeBlocks } from './code-model.js';
+import { CodeComposer } from './code-composer.js';
+import { CommandMenu } from './command-menu.js';
+import { Conversation } from './conversation-model.js';
+import { ComposerFiles } from './composer-files.js';
+import { readImageFile } from './dialogs.js';
+import { FileActions } from './file-actions.js';
+import { FileViewer } from './file-viewer.js';
+import { FilesMarker } from './files-model.js';
+import { createMessageLog, withTexts } from './message-log.js';
 
 // What the pane says, worded for /dm. A host passes its own wording for any of these in
-// `texts`; {sender} and {filename} are filled in.
+// `texts`.
 export const THREAD_TEXTS = Object.freeze({
   idleTitle: 'Pick a conversation',
   idleHint: 'Or start a new chat, or find a group to join.',
@@ -27,14 +36,21 @@ export const THREAD_TEXTS = Object.freeze({
   editOfDeleted: 'That message was deleted, so your edit was not saved.',
   deleteFailed: 'Could not delete the message. Try again.',
   waitForSave: 'Wait for your message to finish saving first.',
+  pinFailed: 'Could not change the pin. Try again.',
   imageUnreadable: 'Could not read that image. Try a different file.',
   imageOnly: 'Drop an image or screenshot here.',
   imageWhileEditing: 'Images can’t be added while you edit a message.',
   imageMessage: '🖼 Image',
-  fileShared: '{sender} shared a file:',
-  fileSharedBySomeone: 'A file was shared:',
-  fileGone: '{filename} is no longer shared with this group.',
-  fileFailed: 'Could not download {filename}. Try again.',
+  filesMessage: '📎 Files',
+  sharedButNotSent: 'Your files are shared, but the message didn’t send. Press Send to try again.',
+  codeMessage: '💻 Code',
+  badGitHubRef: 'Write it like owner/repo#12, owner/repo@abc1234 or owner/repo, or paste a GitHub link.',
+  newIssueNeedsRepo: 'Say which repository first: /newissue owner/repo What went wrong',
+  newIssueBody: 'From the OCS chat “{chat}”: {link}',
+  tooLongForDm: 'That’s too long for a direct message. Save it as a gist instead (/gist).',
+  gistConnect: 'Connect GitHub on your Profile to save gists:',
+  gistConnectLink: 'GitHub Gist connection',
+  gistFailed: 'Could not save the gist. Try again.',
 });
 
 // What an open conversation with no messages says, unless the host passes `emptyState`.
@@ -43,10 +59,15 @@ export const EMPTY_STATES = Object.freeze({
   group: Object.freeze({ title: 'No messages yet', hint: 'Say hi to your group.' }),
 });
 
+// groupFiles(id) is that group's GroupFiles (group-files.js): with it, shared files under a
+// message open and download, and a composer with an Attach button can share files and
+// folders. onOpenFolder(groupId, path) opens a shared folder in the Shared panel's Files tab.
 export function createThread({
   elements, api, socket, richText, me,
   onDmRead = () => {}, onGroupRead = () => {}, onFileShared = () => {},
-  readOnly = false, emptyState = null, texts = {}, formatBody = null,
+  readOnly = false, onSchedule = null, emptyState = null, texts = {}, formatBody = null,
+  groupFiles = null, onOpenFolder = null, viewer: sharedViewer = null, linkCards = null,
+  runCode = null, onCommand = () => {}, profileUrl = '/profile', onChanged = () => {},
 }) {
   if (emptyState !== null && (typeof emptyState !== 'object' || typeof emptyState.title !== 'string')) {
     throw new TypeError('createThread: emptyState must be null or { title, hint }');
@@ -84,29 +105,79 @@ export function createThread({
   let pendingImage = null; // a data URL attached to the next message, or null
   let replyingTo = null; // { id, sender, excerpt } the next message replies to
   let editingReply = null; // the reply marker of the message being edited, kept on save
+  let editingFiles = []; // the files the message being edited lists, kept on save
+  let editingCode = null; // { language, code } of the message being edited, kept on save
+  let unsentFiles = null; // files already shared whose message didn't send yet
   let dragDepth = 0;
   let destroyed = false;
 
   // Replies need chat-reply.js's helpers; a host with an older rich-text.js has none.
   const canReply = typeof richText.addReplyMarker === 'function';
 
+  // Shared files open from the group they were shared in; the viewer lives in the page's .dm root.
+  const openGroupFiles = () => (groupFiles && current?.kind === 'group' ? groupFiles(current.id) : null);
+  const viewer = sharedViewer || (groupFiles ? new FileViewer({ root: elements.messages.closest?.('.dm') || document.body }) : null);
+  const fileActions = groupFiles ? new FileActions({
+    filesFor: openGroupFiles,
+    viewer,
+    notify: message => showFormMessage(message),
+    onOpenFolder: onOpenFolder ? path => onOpenFolder(current?.id, path) : null,
+  }) : null;
+
   // A read-only pane shows the conversation but can't change it: no composer, and no
   // reply, edit or delete.
   const log = createMessageLog(elements.messages, {
     richText, me, onEdit: beginEdit, onDelete: deleteMessage, onReply: canReply ? beginReply : null,
-    readOnly, texts, formatBody,
+    onSchedule, readOnly, texts, formatBody, linkCards, runCode,
+    onPin: readOnly ? null : (message, pinned) => togglePin(message, pinned),
+    onChange: () => noteChange(),
+    // Any code block in the chat can be saved to your own gists (commands is made below).
+    saveGist: readOnly || !api.createGist ? null
+      : (language, code) => commands.saveGist(language, code, `snippet.${CodeBlocks.languageOf(language)?.extension || 'txt'}`),
+    onFile: fileActions ? (action, item, control) => fileActions.handle(action, item, control) : null,
+    thumbnail: fileActions ? item => fileActions.thumbnail(item) : null,
   });
   // Pasted images go where the Image control's would, so only where that control exists.
   const composer = readOnly
     ? null
     : richText.createRichComposer({
-      placeholder: text.placeholder, maxLength: 2000, onSubmit: submit,
+      placeholder: text.placeholder, maxLength: 2000, onSubmit: () => submit(),
       onPasteImage: elements.imageInput ? pasteImage : null,
     });
   if (composer) {
     elements.form.classList.add('chat-form--rich');
     elements.form.insertBefore(composer.element, elements.cancelEdit);
   }
+  // The Attach menu and file sharing, where the page has an Attach button for them.
+  const composerFiles = composer && groupFiles && elements.attachButton ? new ComposerFiles({
+    elements: {
+      attachButton: elements.attachButton, menuHost: elements.attachMenuHost || elements.form,
+      imageInput: elements.imageInput, filesInput: elements.filesInput, folderInput: elements.folderInput,
+      tray: elements.tray, dropZone: elements.dropZone || elements.form, dropHint: elements.dropHint,
+    },
+    groupFiles,
+    onImage: file => pasteImage(file),
+    showMessage: message => showFormMessage(message),
+  }) : null;
+  // The code box (/code, /gist) and the slash-command menu sit above the composer too.
+  const codeBox = composer && elements.codeHost ? new CodeComposer({
+    host: elements.codeHost,
+    onSubmit: () => submit(),
+    onClose: () => composer.focus(),
+  }) : null;
+  const commandMenu = composer && elements.commandHost ? new CommandMenu({
+    composer,
+    host: elements.commandHost,
+    kindOf: () => (current?.loaded && !editing ? current.kind : null),
+    onRun: (command, args) => commands.run(command, args),
+  }) : null;
+  // What the slash commands do (chat-commands.js).
+  const commands = composer ? new ChatCommands({
+    elements, composer, codeBox, api, me, text, profileUrl, onCommand,
+    conversation: () => (current ? { kind: current.kind, id: current.id } : null),
+    send: html => sendHtml(html),
+    say: message => showFormMessage(message),
+  }) : null;
   // "Replying to …" sits just above the composer.
   const replyBar = composer && canReply ? richText.createReplyBar({ onCancel: clearReply }) : null;
   if (replyBar) {
@@ -140,12 +211,8 @@ export function createThread({
     elements.cancelEdit.hidden = !editing;
     elements.cancelEdit.disabled = pending === 'edit';
     setSendLabel(editing ? 'fa-save' : 'fa-paper-plane', editing ? text.save : text.send);
-    // Attaching is offered only where the conversation can store an image, and not
-    // while editing, which rewrites the text of a message that is already sent.
-    if (elements.imageAttach) {
-      const canAttach = loaded && !editing && Boolean(kinds[current?.kind]?.supportsImages);
-      elements.imageAttach.classList.toggle('hidden', !canAttach);
-    }
+    // Attaching isn't offered while editing, which rewrites the text of a sent message.
+    composerFiles?.setContext({ kind: current?.kind ?? null, id: current?.id ?? null, loaded, editing: Boolean(editing) });
   }
 
   // ── Attaching an image ───────────────────────────────────────────────────────
@@ -202,7 +269,10 @@ export function createThread({
     replyingTo = {
       id: message.id,
       sender: message.isSelf ? me.name : message.senderName,
-      excerpt: richText.replyExcerpt(html) || (message.image ? text.imageMessage : ''),
+      excerpt: richText.replyExcerpt(html)
+        || (message.image ? text.imageMessage : '')
+        || (FilesMarker.extract(html).items.length ? text.filesMessage : '')
+        || (CodeBlocks.extractMarker(FilesMarker.extract(html).html).code !== null ? text.codeMessage : ''),
     };
     replyBar.show(replyingTo);
     showFormMessage('');
@@ -212,6 +282,8 @@ export function createThread({
   function resetEdit() {
     editing = null;
     editingReply = null;
+    editingFiles = [];
+    editingCode = null;
     clearReply();
     composer?.clear();
     clearImage();
@@ -226,7 +298,13 @@ export function createThread({
     // The quote isn't editable text: it is set aside and put back on save.
     const { reply, html } = canReply ? richText.extractReplyMarker(message.body) : { reply: null, html: message.body };
     editingReply = reply;
-    composer.setHTML(html);
+    // So is the list of files it shared: an edit changes the words, not what was shared.
+    const { items, html: afterFiles } = FilesMarker.extract(html);
+    editingFiles = items;
+    // And so is its code block, which the editor can't show as text.
+    const { language, code, html: words } = CodeBlocks.extractMarker(afterFiles);
+    editingCode = code === null ? null : { language, code };
+    composer.setHTML(words);
     showFormMessage('');
     refreshComposer();
     composer.focus();
@@ -254,21 +332,78 @@ export function createThread({
     }
   }
 
-  async function submit() {
-    // An image on its own is a message, so an empty composer is only a reason to stop
-    // when nothing is attached. Editing stays text-only.
+  // Shares what waits in the tray before the message goes. Resolves the items for its
+  // [[files:…]] marker, [] when nothing waits, or null when the message should stay unsent.
+  async function shareFirst() {
+    if (unsentFiles) return unsentFiles;
+    if (!composerFiles?.hasFiles()) return [];
+    const shared = await composerFiles.share();
+    return shared ? shared.items : null;
+  }
+
+  // asCommand false sends what a command made (/me's words) without reading it as one.
+  async function submit({ asCommand = true } = {}) {
+    // A finished slash command runs instead of sending ("/issue a/b#3" from the Send button).
+    const typed = asCommand && !editing ? commandMenu?.typedCommand() : null;
+    if (typed && !pending && current?.loaded) {
+      composer.clear();
+      commands.run(typed.command, typed.args);
+      return;
+    }
+    // An image, files or a code block on their own are a message, so an empty composer is
+    // only a reason to stop when nothing is attached. Editing stays text-only.
     const sendingImage = !editing && pendingImage;
+    const sendingFiles = !editing && (Boolean(unsentFiles) || Boolean(composerFiles?.hasFiles()));
+    const code = !editing ? codeBox?.value() : null;
+    // Code the box can't send (over its limit, which its hint says) holds the words back too,
+    // so they never go without it.
+    if (!editing && !code && codeBox?.hasCode()) return;
     if (pending || !current?.loaded || composer.isOverLimit()) return;
-    if (composer.isEmpty() && !sendingImage) return;
+    // An edit may take out all of a code message's words: its code is still a message.
+    if (composer.isEmpty() && !sendingImage && !sendingFiles && !code && !(editing && editingCode)) return;
+    if (sendingFiles && composerFiles?.problem()) return; // the tray says why
     const { kind, id } = current;
     const target = editing;
     const html = composer.getHTML();
     const reply = target ? editingReply : replyingTo;
-    const outgoing = reply ? richText.addReplyMarker(html, reply) : html;
     const hadFocus = composer.element.contains(document.activeElement);
     pending = target ? 'edit' : 'send';
     showFormMessage('');
     refreshComposer();
+    // Only a share waits before the send: a plain message goes out at once.
+    // An edit keeps the files its message lists; only a share waits before a send.
+    let files = [];
+    if (target) files = editingFiles;
+    else if (sendingFiles) files = await shareFirst();
+    if (destroyed) return;
+    if (files === null) {
+      pending = null;
+      refreshComposer();
+      return;
+    }
+    // A code block goes in the message as its marker; a gist is saved first, and its link goes.
+    let withCode = target && editingCode ? CodeBlocks.addMarker(html, editingCode.language, editingCode.code) : html;
+    if (code?.mode === 'code') {
+      withCode = CodeBlocks.addMarker(html, code.language, code.code);
+    } else if (code?.mode === 'gist') {
+      const url = await commands.saveGist(code.language, code.code, code.filename);
+      if (destroyed) return;
+      if (!url) {
+        pending = null;
+        refreshComposer();
+        return;
+      }
+      withCode = html ? `${html} ${url}` : url;
+    }
+    const withFiles = FilesMarker.add(withCode, files);
+    const outgoing = reply ? richText.addReplyMarker(withFiles, reply) : withFiles;
+    // Spring keeps a direct message to 2,000 characters, so a longer one never goes.
+    if (kind === 'dm' && outgoing.length > ChatCommands.DM_MAX_LENGTH) {
+      pending = null;
+      refreshComposer();
+      showFormMessage(text.tooLongForDm);
+      return;
+    }
     let saved = null;
     try {
       if (target) await kinds[kind].edit(id, target.id, outgoing);
@@ -279,12 +414,20 @@ export function createThread({
       if (target && log.get(target.key)?.deleted) {
         resetEdit();
         showFormMessage(text.editOfDeleted);
+      } else if (!target && files.length) {
+        // The files are up; the next Send tries the message again without uploading them twice.
+        unsentFiles = files;
+        refreshComposer();
+        showFormMessage(text.sharedButNotSent);
       } else {
         refreshComposer();
         showFormMessage(target ? text.editFailed : text.sendFailed);
       }
       return;
     }
+    unsentFiles = null;
+    // Code changed while the message was saving stays in the box for the next one.
+    if (code && codeBox.value()?.code === code.code) codeBox.close();
     // A pane destroyed while the message was saving has nothing left to update or fetch.
     if (destroyed) return;
     pending = null;
@@ -307,7 +450,49 @@ export function createThread({
     if (!socket.isConnected()) loadNew(kind, id);
   }
 
+  // Sends a message a command made (a GitHub link, /me, /shrug) as if it had been typed.
+  function sendHtml(html) {
+    composer.setHTML(html);
+    submit({ asCommand: false });
+  }
+
   // A group send answers with the chat's messages, a DM send with the saved message's event.
+  // onChanged(kind, id) after the open conversation's messages change, once per burst: a
+  // history of a hundred messages loading is one change, so the Shared panel draws once.
+  let changeQueued = false;
+  function noteChange() {
+    if (changeQueued) return;
+    changeQueued = true;
+    queueMicrotask(() => {
+      changeQueued = false;
+      if (current && !destroyed) onChanged(current.kind, current.id);
+    });
+  }
+
+  // Pins or unpins a message by sending a pin message ([[pin:<id>]], conversation-model.js),
+  // so everyone in the conversation sees the same pins.
+  async function togglePin(message, pinned) {
+    if (!current?.loaded || !message?.id) return false;
+    if (pending) {
+      showFormMessage(text.waitForSave);
+      return false;
+    }
+    const { kind, id } = current;
+    showFormMessage('');
+    try {
+      const body = pinned ? Conversation.unpinMarker(message.id) : Conversation.pinMarker(message.id);
+      const saved = await kinds[kind].send(id, body, null);
+      if (destroyed || !isOpen(kind, id)) return true;
+      showSaved(kind, id, saved);
+      if (!socket.isConnected()) loadNew(kind, id);
+      return true;
+    } catch (error) {
+      console.warn('Messages: could not change the pin', error);
+      if (!destroyed && isOpen(kind, id)) showFormMessage(text.pinFailed);
+      return false;
+    }
+  }
+
   function showSaved(kind, id, saved) {
     if (kind === 'group' && Array.isArray(saved)) {
       saved.map(groupMessage).forEach(message => log.append(message, isMine(kind, message)));
@@ -333,27 +518,6 @@ export function createThread({
       console.warn('Messages: could not delete the message', error);
       button.disabled = false;
       showFormMessage(text.deleteFailed);
-    }
-  }
-
-  // The socket's file frame carries the bytes, but a conversation opened later only has
-  // the line in the log, so the file is fetched by name when it is clicked. The list
-  // endpoint is the only way to read one back -- there is no per-file URL.
-  async function downloadShared(groupId, filename, control) {
-    control.disabled = true;
-    try {
-      const files = await api.groupFiles(groupId);
-      const match = (files || []).find(file => file.filename === filename);
-      if (!match) {
-        showFormMessage(fillText(text.fileGone, { filename }));
-        return;
-      }
-      saveFile(match);
-    } catch (error) {
-      console.warn('Messages: could not download the shared file', error);
-      showFormMessage(fillText(text.fileFailed, { filename }));
-    } finally {
-      control.disabled = false;
     }
   }
 
@@ -387,11 +551,10 @@ export function createThread({
         // Someone else deleting a message can change your unread count.
         if (kind === 'dm' && change.senderUid !== me.uid) window.dispatchEvent(new Event('dm:refresh-unread'));
         break;
+      // A file went up. The message that shares it lists it, so the log adds nothing; the
+      // group's file list is just out of date.
       case 'file':
-        log.note(
-          change.sender ? fillText(text.fileShared, { sender: change.sender }) : text.fileSharedBySomeone,
-          { label: change.filename, onClick: control => downloadShared(id, change.filename, control) },
-        );
+        groupFiles?.(id)?.refresh();
         onFileShared(id);
         break;
       case 'error':
@@ -433,6 +596,13 @@ export function createThread({
     }
     const ticket = ++openCount;
     current = { kind, id, loaded: false, catchUp: false };
+    unsentFiles = null;
+    // Like the text, a code block being written belongs to the conversation it was begun in.
+    codeBox?.close();
+    fileActions?.clear();
+    // The page hears about shares only in the open conversation, so a group's list kept from
+    // an earlier visit may miss files shared meanwhile; the next read fetches it again.
+    if (kind === 'group') groupFiles?.(id)?.refresh();
     early = [];
     unseenWhileHidden = false;
     setHeading(title, subtitle);
@@ -507,6 +677,12 @@ export function createThread({
     socket.unfollow();
     document.removeEventListener('visibilitychange', onVisibilityChange);
     composer?.destroy();
+    composerFiles?.destroy();
+    commandMenu?.destroy();
+    codeBox?.destroy();
+    fileActions?.clear();
+    // A viewer the page handed in is the page's to keep.
+    if (!sharedViewer) viewer?.destroy();
     // Takes the image viewer and its Escape listener off the page too.
     log.destroy();
   }
@@ -519,7 +695,13 @@ export function createThread({
       submit();
     });
     elements.cancelEdit.addEventListener('click', resetEdit);
-    elements.imageInput?.addEventListener('change', event => pickImage(event.target.files?.[0]));
+    elements.imageInput?.addEventListener('change', event => {
+      pasteImage(event.target.files?.[0]);
+      event.target.value = '';
+    });
+  }
+  // Without file sharing (an embed), an image dropped on the composer is attached the old way.
+  if (composer && !composerFiles) {
     const setDragging = active => {
       elements.form.classList.toggle('is-dragging', active);
       if (elements.dropHint) elements.dropHint.setAttribute('aria-hidden', String(!active));
@@ -543,6 +725,8 @@ export function createThread({
       setDragging(false);
       pickImage(event.dataTransfer?.files?.[0]);
     });
+  }
+  if (composer) {
     elements.imageRemove?.addEventListener('click', () => {
       clearImage();
       refreshComposer();
@@ -561,7 +745,14 @@ export function createThread({
   close();
 
   return {
-    open, close, resume, setHeading, showMessage, destroy,
+    open, close, resume, setHeading, showMessage, destroy, togglePin,
     current: () => (current ? { kind: current.kind, id: current.id } : null),
+    // The open conversation's messages as loaded, oldest first: the Shared panel reads its
+    // media, links and pins from them.
+    messages: () => (current?.loaded ? log.list() : []),
+    isPinned: messageId => log.isPinned(messageId),
+    // Ctrl or Cmd+/ (shortcuts.js) opens the commands as if / had been typed. With a draft
+    // in the box the menu would replace it, so /help lists the commands instead.
+    showCommands: () => commandMenu?.open() || onCommand('help'),
   };
 }

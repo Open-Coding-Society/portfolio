@@ -17,19 +17,20 @@ toolkit's `aesthetihawk` layout. The layout holds:
   when the site runs Spring (`spring` in `_config.yml` isn't `false`).
 - a JSON list of courses, built from each course's `course.title` in
   `_projects/systems/courses/data/<course>.yml` (published to `_data/`)
-- one starter script that imports the shared helpers with the `site.baseurl` path and
-  calls `initProfilePage(api)`
+- one starter script that creates a Profile from Login's backends and calls
+  `initProfilePage({ profile })`
 
 ## Modules
 
-Each module runs one part of the page. They receive the shared helpers as `api`
-(`pythonURI`, `javaURI`, `springEnabled`, `fetchOptions`, `putUpdate`, `postUpdate`)
-and import each other only with `./` paths. When `springEnabled` is false, none of
+Each module runs one part of the page. They receive a `FlaskProfile` or
+`SpringProfile` from `profile-backend.js` and import each other only with `./` paths.
+When `springEnabled` is false, none of
 them calls Spring: Account saves to Flask only, Classes skips the course-group sync,
 and `profile-page.js` doesn't start Face ID or watch the Gist card.
 
 | Module | Runs | Endpoints |
 |---|---|---|
+| `profile-backend.js` | Loads and saves account, classes, personas, skills and Face ID | Flask and optionally Spring |
 | `profile-page.js` | Starts the others; the top card and its setup checklist | none |
 | `profile-account.js` | The Account form | Flask `GET /api/id`; for each changed field, Flask `PUT /api/user` and, with Spring, Spring `POST /api/person/update` |
 | `profile-classes.js` | The course list, Add class and Remove | Flask `GET`/`POST /api/user/class`; with Spring, Spring `PUT /api/groups/class-memberships` |
@@ -62,7 +63,7 @@ Each part saves on its own, so no single Save button covers the whole page:
   session stops working once it changes.
 - Course changes run one at a time, so Spring's course groups never get a stale list.
 - Persona cards and course rows are built with `textContent`, not HTML strings.
-- The layout reads `site.spring` and the modules read `springEnabled` from `config.js`.
+- The layout reads `site.spring` and creates a profile using `springEnabled` from `config.js`.
   Both treat a missing setting as Spring on, so the cards on the page and the calls
   the modules make always agree.
 - `config.js` and `pages/profile.md` have `regenerate: true` in their front matter.
@@ -73,7 +74,7 @@ Each part saves on its own, so no single Save button covers the whole page:
 
 ## Testing
 
-- `node --test tests/profile_model.test.mjs` and `node --test tests/test_gist_connection.mjs`.
+- `node --test _projects/systems/profile/tests/*.test.mjs`.
 - In a browser, run the local site with Flask (`localhost:8587`) and Spring
   (`localhost:8585`), or answer their requests with stubs. Check:
   - Save sends only the edited field.

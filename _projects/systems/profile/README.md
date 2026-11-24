@@ -53,9 +53,9 @@ published copies. Edit the sources here.
 
 ## Imports
 
-The layout's starter script imports the shared helpers (`assets/js/api/config.js`
-and `assets/js/api/profile.js`) with `{{ site.baseurl }}` and passes them to
-`initProfilePage(api)`, `springEnabled` included. The Gist include does the same for
+The layout's starter imports `config.js`, Login's `createBackends` and
+`createProfile` with `{{ site.baseurl }}`, then passes the selected Flask or
+Spring profile to `initProfilePage({ profile })`. The Gist include supplies
 `javaURI`. The AI connections include passes both `javaURI` and shared `fetchOptions`
 from that configuration; requests override only the method, cache (`no-store`) and
 save body. The modules import each other only with `./` paths, so moving this folder
@@ -64,10 +64,4 @@ can't break them. A site that uses Profile needs a `config.js` that exports
 
 ## Tests
 
-- `node --test tests/profile_model.test.mjs`: the pure helpers in `js/profile-model.js`
-  (the root file imports `tests/profile_model.test.mjs` from this system).
-- `node --test tests/test_gist_connection.mjs`: the Gist card.
-- `node --test tests/test_ai_connections.mjs`: independent AI-key saves, replacement, disconnect and failures.
-- `bundle exec ruby tests/test_ai_profile_layout.rb`: AI card rendering, shared controls,
-  publication paths and Flask-only omission. AI credentials are optional and do not add
-  a required step to the setup checklist.
+- `node --test _projects/systems/profile/tests/*.test.mjs`: backend and page behavior.

@@ -7,6 +7,9 @@
     <body>
         {%- include themes/minima/header.html -%}
 
+        {% if page.page_viewer %}{% include page-viewer.html viewer=page.page_viewer %}{% endif %}
+        {% for viewer in page.page_viewers %}{% include page-viewer.html viewer=viewer %}{% endfor %}
+
         {% if page.microblog %}
           <div class="micro-actions-wrapper">
             {% include microblog_foundation.html %}

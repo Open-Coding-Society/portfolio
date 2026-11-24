@@ -1,30 +1,41 @@
 {% assign topics_course_context = false %}
 {% if include.course_context == true and page.topics_context != true %}{% assign topics_course_context = true %}{% endif %}
 <section class="topics-browser" data-topics-browser data-course-context="{{ topics_course_context }}" data-initial-category="{{ page.lesson_category | downcase | escape }}" data-index-url="{{ '/assets/js/projects/topics/data.json' | relative_url }}" data-unit-names="{{ site.data.projects.topics.topics_units | jsonify | escape }}">
+  <script data-topics-bootstrap>
+    (function (root) {
+      root.classList.add('topics-browser--loading');
+      function showFallback() {
+        console.error('Topics scripts could not load.');
+        root.classList.remove('topics-browser--loading');
+        root.querySelector('[data-topics-status]').textContent = 'Topics search is unavailable. Reload to retry; document links remain available.';
+        root.querySelectorAll('input[type="checkbox"], #topics-view').forEach(function (control) { control.disabled = true; });
+      }
+      root.addEventListener('error', function (event) {
+        if (event.target.hasAttribute('data-topics-script')) showFallback();
+      }, true);
+      root.addEventListener('topics-load-error', showFallback);
+    })(document.currentScript.parentElement);
+  </script>
   <div class="ocs__split ocs__split--aside">
     <aside class="ocs__stack" aria-label="Browse topics">
-      <h2>Topics</h2>
+      <header class="topics-browser__header">
+        <h2>Topics</h2>
+        <label class="topics-browser__accessible-label" for="topics-view">View</label>
+        <select class="ocs__input" id="topics-view"><option value="list">Compact list</option><option value="cards">Cards</option></select>
+      </header>
       <div class="topics-browser__search-input">
         <label class="topics-browser__accessible-label" for="topics-query">Search</label>
         <input class="ocs__input" id="topics-query" type="search" placeholder="Search every lesson" autocomplete="off" disabled>
-        <button type="button" class="ocs__btn small accent" data-topics-search-clear disabled>Clear Search</button>
+        <button type="button" class="ocs__btn topics-browser__search-clear" data-topics-search-clear aria-label="Clear search" aria-controls="topics-query" disabled>&#215;</button>
       </div>
-      <nav aria-label="Topics">
-        <h3>Browse</h3>
-        <div class="ocs__tree" data-topics-nav></div>
-      </nav>
-      <section data-topics-more hidden>
-        <h3>More categories</h3>
-        <p class="ocs__links" data-topics-shortcuts></p>
-      </section>
-      <details class="topics-browser__category-disclosure" data-topics-advanced>
-        <summary><h3>Advanced filters</h3></summary>
+      <section aria-label="Topic filters">
         <div class="topics-browser__filters" id="topics-filters" role="group" aria-label="Topic and category filters">
           <details class="topics-browser__category-disclosure" data-topics-primary open>
             <summary><h3>Topic Filter</h3></summary>
-            <p class="ocs__links" role="group" aria-label="Combine checked topics" data-topics-match>
-              <button type="button" class="ocs__btn small accent fill" value="or" aria-pressed="true" title="Show documents in any checked topic" disabled>OR: any</button>
-              <button type="button" class="ocs__btn small accent" value="and" aria-pressed="false" title="Show only documents in every checked topic" disabled>AND: all</button>
+            <p class="ocs__links" role="group" aria-label="Topic and category filter controls" data-topics-match>
+              <button type="button" class="ocs__btn small accent fill" value="or" aria-pressed="true" title="Show documents in any checked topic or category" disabled>OR</button>
+              <button type="button" class="ocs__btn small accent" value="and" aria-pressed="false" title="Show only documents in every checked topic and category" disabled>AND</button>
+              <button type="button" class="ocs__btn small accent" data-topics-clear aria-label="Clear topic and category filters" aria-controls="topics-filters" disabled>CLEAR</button>
             </p>
             <fieldset class="topics-browser__categories topics-browser__primary">
               <legend class="topics-browser__accessible-label">Topic Filter</legend>
@@ -33,36 +44,30 @@
               {% endfor %}
             </fieldset>
           </details>
-          <details class="topics-browser__category-disclosure" data-topics-secondary>
-            <summary><h3>Categories Filter</h3></summary>
-            <fieldset class="topics-browser__categories">
-              <legend class="topics-browser__accessible-label">Categories Filter</legend>
+          <details class="topics-browser__category-disclosure" data-topics-secondary open>
+            <summary><h3>More Categories</h3></summary>
+            <fieldset class="topics-browser__categories topics-browser__category-chips">
+              <legend class="topics-browser__accessible-label">More Categories</legend>
               {% for category in site.data.topics_secondary_categories %}
-              <label data-topics-label="{{ category[1] | escape }}"><input type="checkbox" value="{{ category[0] | escape }}"> {{ category[1] | escape }}</label>
+              <label class="ocs__btn small accent" data-topics-label="{{ category[1] | escape }}"><input type="checkbox" value="{{ category[0] | escape }}"> {{ category[1] | escape }}</label>
               {% endfor %}
             </fieldset>
           </details>
-          <button type="button" class="ocs__btn small accent" data-topics-clear aria-controls="topics-filters" disabled>Clear Filters</button>
         </div>
-        <p class="topics-browser__actions">
-          <label for="topics-view">View</label>
-          <select class="ocs__input" id="topics-view"><option value="list">Compact list</option><option value="cards">Cards</option></select>
-        </p>
-      </details>
+      </section>
     </aside>
     <div class="ocs__stack">
       <header>
         <h2 data-topics-heading>All topics</h2>
         <p class="ocs__lead" role="status" aria-live="polite" data-topics-status>Loading full-text search…</p>
       </header>
-      <div class="ocs__grid ocs__grid--card" data-topics-overview></div>
       <h2 data-topics-title-heading hidden>Title matches <span class="topics-browser__count" data-topics-title-count></span></h2>
       <div class="ocs__stack" data-topics-results>
         <div data-topics-flat>
           <div class="topics-browser__results">
             {% for document in site.data.topics_catalog %}
             <article class="topics-browser__card" data-topic-url="{{ document.url | escape }}">
-              <h2><a href="{% if topics_course_context %}{{ document.url | relative_url }}{% else %}{{ document.viewUrl | relative_url }}{% endif %}">{{ document.title | escape }}</a></h2>
+              <h2><a data-topics-document="{{ document.url | escape }}" href="{% if topics_course_context %}{{ document.url | relative_url }}{% else %}{{ document.viewUrl | relative_url }}{% endif %}">{{ document.title | escape }}</a></h2>
               {% if document.description != empty %}<p>{{ document.description | escape }}</p>{% endif %}
               <p class="topics-browser__metadata">{{ document.categories | join: ' · ' | escape }}</p>
               {% if topics_course_context and document.weeks.size > 0 %}
@@ -81,6 +86,7 @@
     </div>
   </div>
   <noscript>Enable JavaScript to combine category filters and use full-text search. The document links above remain available.</noscript>
+  <script src="{{ '/assets/js/vendor/lunr.min.js' | relative_url }}" data-topics-script></script>
+  <script type="module" src="{{ '/assets/js/projects/topics/browser.js' | relative_url }}" data-topics-script></script>
+  <script nomodule>document.currentScript.parentElement.dispatchEvent(new Event('topics-load-error'));</script>
 </section>
-<script src="{{ '/assets/js/vendor/lunr.min.js' | relative_url }}"></script>
-<script type="module" src="{{ '/assets/js/projects/topics/browser.js' | relative_url }}"></script>

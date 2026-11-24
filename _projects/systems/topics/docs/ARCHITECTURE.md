@@ -12,11 +12,9 @@ Topics organizes published learning material by subject rather than by teaching
 time. It provides category selection, filtered browsing, full-text search and
 context-preserving document navigation.
 
-[Blogs](../../blogs/docs/ARCHITECTURE.md) supplies the document publishing and
-interactive viewing foundation. [Courses](../../courses/docs/ARCHITECTURE.md)
-organizes documents into curriculum, sprints and weeks. Topics supplies another
-entry into the same authored material, independent of schedules, announcements
-and course chat.
+[Blogs](../../blogs/docs/ARCHITECTURE.md) supplies document publishing and
+interactive viewing. Topics supplies an entry into authored material independent
+of schedules, announcements and course chat.
 
 A document can participate in both a course and a reference collection. Its
 categories determine its Topics membership; its course/week metadata determines
@@ -34,7 +32,7 @@ Conversion and Jekyll posts/pages
     +---- categories ----> Topics
     |                      ├── Reference browser
     |                      │   ├── Topic Filter - prominent categories
-    |                      │   ├── Categories Filter - remaining categories
+    |                      │   ├── More Categories - remaining categories
     |                      │   ├── Cards / List browsing
     |                      │   └── Scoped full-text Search
     |                      │       ├── Title matches - highlighted cards
@@ -43,16 +41,12 @@ Conversion and Jekyll posts/pages
     |                          ├── Full authored content
     |                          ├── Runners and Submissions
     |                          └── Return and related-document navigation
-    |
-    +---- course/week ---> Courses
-                           └── Curriculum and course document view
-
 Blogs supplies shared document layouts and interactive integrations.
 ```
 
 The diagram describes capabilities and relationships, not separate copies of
-authored lessons. Topics and Courses now use one canonical document URL with
-navigation context in the query string, rather than generated document copies.
+authored lessons. Topics uses the canonical document URL with navigation context
+in the query string, rather than generating document copies.
 
 ## Categories and primary topics
 
@@ -63,23 +57,15 @@ categories: [Java, Algorithms]
 ```
 
 Categories are independent facets, not an ordered parent/child path. Both filter
-groups support multiple selections. Checked boxes in the same group are
-alternatives: Java and Python finds every document in either collection. The two
-groups narrow each other: Java (Topic Filter) and Algorithms (Categories Filter)
-finds documents in both. In set terms, each group is a union and the groups are
-intersected.
-
-The Topic Filter has OR and AND buttons. OR, the default, is the rule above. AND
-requires every checked Topic Filter box: Java and Spring finds only documents in
-both collections. Categories Filter boxes remain alternatives in both modes, and
-the two groups still narrow each other. In set terms, AND makes the Topic group an
-intersection instead of a union.
+groups support multiple selections. OR, the default, matches any selected topic
+or category. AND requires every selected topic and category.
 
 The [primary topics configuration](../data/topics_primary.yml) orders prominent
 categories: SASS, Python, Java, JavaScript, Flask, Spring, CS111, CS112 and CS113.
 This YAML controls visibility and order, not membership. Primary categories
 remain selectable even when their collection is empty. Remaining discovered
-categories appear in the secondary group.
+categories appear in the secondary group when they have at least five documents;
+selected low-count categories remain visible for clearing.
 
 No separate `topics:` attribute is required. Membership is not inferred from
 filenames, week numbers, lesson language or lesson grouping. CS112 and CS113
@@ -114,23 +100,21 @@ loaded through relative includes is not expanded into the search text.
 ## Browser and search
 
 The [browser include](../_includes/topics-browser.html) is a full-width page
-with a sidebar (`ocs__split--aside`): Search, a Browse list of topics with counts,
-More categories shortcuts, and a collapsed Advanced filters disclosure. Choosing a
-topic shows its lessons as unit cards; each lesson is a dropdown with its full
+with a sidebar (`ocs__split--aside`): the view selector, Search, Topic Filter,
+and More Categories. Lessons appear in unit cards; each lesson is a dropdown with its full
 description and an Open lesson link, and quizzes and FRQ practice sit in the
 unit's Practice row. Units come from lesson titles; their optional names come
 from [`topics_units.yml`](../data/topics_units.yml). Layout details are in the
 [README](../README.md#page-layout).
 
-Advanced filters holds the original two disclosures. Topic Filter defaults open;
-Categories Filter defaults closed. Topic Filter starts with its OR/AND pair:
+Both filter disclosures default open. Topic Filter starts with its OR/AND pair:
 `ocs__btn` buttons in an `ocs__links` group, the current choice filled and
-`aria-pressed`, disabled until the search index loads. Clear Filters belongs to
+`aria-pressed`, disabled until the search index loads. CLEAR belongs to
 that box and clears only category selections. Search has its own clear control.
 Each clear button is dimmed and disabled when its corresponding state is empty.
 
 The [browser controller](../js/browser.js) builds a Lunr index in the client
-from the static catalog. Title, description and content participate in search,
+from the static catalog. Title, description, categories and content participate in search,
 with title matches boosted. User input is tokenized as terms rather than
 interpreted as Lunr query syntax.
 
@@ -138,7 +122,7 @@ Browsing and search use the same category filter:
 
 | Mode | Output |
 | --- | --- |
-| No query | Topic tiles, or the chosen topic's unit cards (lesson dropdowns or cards) |
+| No query | Topic unit cards (lesson dropdowns or cards) |
 | Search query | Title-match cards, followed by text-match cards with excerpts |
 | No matching documents | Explicit empty-result status |
 | Index unavailable | Error status with ordinary document links still available |
@@ -155,11 +139,11 @@ the selected collection rather than replacing it with a global search overlay.
 
 ## Document viewing and navigation
 
-The reference browser opens the original permalink with `?context=topics`.
-The [shared reader](../../courses/reader/reader.rb) renders one document with a
-Course or Topics sidebar. Its [controller](../../courses/reader/js/browser.js)
-switches navigation without replacing content, runner editors or submission
-forms. Course options come only from the document's own course placements.
+The reference browser opens the original permalink with
+`?context=topics&topics_view=1`. The shared page viewer provides a return link
+and previous/next controls; its Topics adapter uses the displayed result order
+saved in session storage. If no matching snapshot exists, it reports that
+stepping is unavailable. Portfolio does not require the Pages Courses reader.
 
 The [Blogs post layout](../../blogs/layouts/post.html) retains the original
 document URL as submission identity and uses its existing forms and feedback
@@ -169,15 +153,13 @@ into the document shell.
 
 Former `/topics/view/` addresses contain small compatibility redirects. They
 preserve filters and fragments while forwarding to the canonical document.
-The reader's Topics return link restores the category/query state. Its sidebar
-uses the same category selection rules as the full browser; full-text search
-and highlighting remain in the full Topics catalog.
+The Topics return link restores the category/query state and scroll position.
 
 URL parameters carry browser state:
 
 - Repeated `category` values identify selected facets.
 - `q` carries the search text.
-- `match=and` requires every checked Topic Filter box; OR is the default.
+- `match=and` requires every checked topic and category; OR is the default.
 - `view=cards` shows cards inside unit cards; the compact lesson list is the default.
 
 State is shareable and restored during browser history navigation. Clearing

@@ -195,10 +195,11 @@ Gist card need Spring, so a Flask-only site (spring: false in _config.yml) leave
 </div>
 
 <script type="module">
-    // The shared helpers are imported here, where Jekyll fills in the site's baseurl, and
-    // handed to the profile modules, which import each other only with ./ paths.
+    // Construct the profile with the backends selected by the site configuration.
     import { fetchOptions, javaURI, pythonURI, springEnabled } from '{{ site.baseurl }}/assets/js/api/config.js';
-    import { postUpdate, putUpdate } from '{{ site.baseurl }}/assets/js/api/profile.js';
+    import { createBackends } from '{{ site.baseurl }}/assets/js/login/backend.js';
+    import { createProfile } from '{{ site.baseurl }}/assets/js/profile/profile-backend.js';
     import { initProfilePage } from '{{ site.baseurl }}/assets/js/profile/profile-page.js';
-    initProfilePage({ fetchOptions, javaURI, pythonURI, springEnabled, postUpdate, putUpdate });
+    const profile = createProfile(createBackends({ pythonURI, javaURI, fetchOptions, springEnabled }));
+    initProfilePage({ profile });
 </script>

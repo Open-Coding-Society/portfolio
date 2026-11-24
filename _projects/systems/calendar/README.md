@@ -92,6 +92,9 @@ For detailed module documentation, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
   - Every doc page (Blogs `post.html`) has an **Add to Calendar** button that opens `/student/calendar?doc=<url>&title=<title>` with the Add New Event modal filled in
   - Edits always send a `period` (the backend requires one); events with no course are saved as `Personal`, which the calendar treats as no course
   - Test: `node --test tests/calendar_doc_links.test.mjs`
+- Event text is escaped or sanitized with `CalendarSafeHtml`; alert metadata is
+  read and written by `CalendarAlerts`. Test with
+  `node --test _projects/systems/calendar/tests/*.test.mjs`.
 
 ### Issue Tracking
 - GitHub-style issue creation and management

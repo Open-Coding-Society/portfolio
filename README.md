@@ -126,6 +126,9 @@ Scraper, and Topics systems. The November 2026 sync used Pages revision
 `8b965e58a`. For the next update, review changes since that revision and bring
 over only registered systems and their shared converter, Sass, JavaScript,
 include, and layout dependencies.
+The shared page viewer, Topics browser, OCS grammar, Profile backend, Calendar,
+Login session and Messages were selectively updated from Pages after that
+revision; this is not a full systems sync. UI Builder stays in Pages.
 
 Edit system sources under [`_projects/systems/`](_projects/systems/), not their
 published copies. Project Makefiles are generated from

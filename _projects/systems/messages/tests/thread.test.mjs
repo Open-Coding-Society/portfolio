@@ -106,9 +106,10 @@ test('a pane needs no onDmRead, onGroupRead or onFileShared', async () => {
 
   thread.open('group', 7, { title: 'Team Turing', subtitle: '' });
   await settle();
-  socket.handler({ context: 'sendFileServer', sender: 'Grace', filename: 'plan.pdf' });
+  socket.handler({ context: 'sendFileServer', sender: 'Grace', filename: 'plan.pdf', size: 12 });
   socket.handler(groupFrame('m9', 'Grace Hopper', 'new here'));
-  assert.match(elements.messages.textContent, /Grace shared a file:/);
+  // The message that shares a file lists it; the socket's file frame adds no line of its own.
+  assert.doesNotMatch(elements.messages.textContent, /plan\.pdf/);
   assert.match(elements.messages.textContent, /new here/);
 });
 
@@ -246,4 +247,22 @@ test('showMessage with no conversation open does nothing', () => {
   const { thread, elements } = makeThread();
   thread.showMessage('1');
   assert.equal(elements.messages.querySelector('.is-found'), null);
+});
+
+test('a GitHub link in a DM shows its card under the message', async () => {
+  const api = stubApi({ dmMessages: [{ id: 1, senderUid: 'grace', senderName: 'Grace', body: 'my PR https://github.com/Open-Coding-Society/pages/pull/2066', sentAt: '2026-10-20T10:00:00Z' }] });
+  const asked = [];
+  const linkCards = html => {
+    asked.push(html);
+    const box = document.createElement('div');
+    box.appendChild(document.createElement('a'));
+    return box;
+  };
+  const { thread, elements } = makeThread({ api, linkCards });
+
+  thread.open('dm', 5, { title: 'Grace', subtitle: 'Direct message' });
+  await settle();
+
+  assert.equal(elements.messages.querySelectorAll('.chat-cards').length, 1);
+  assert.match(asked[0], /pages\/pull\/2066/);
 });

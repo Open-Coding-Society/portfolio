@@ -1,0 +1,20 @@
+---
+---
+{
+  "name": "Open Coding Society",
+  "short_name": "OCS",
+  "start_url": {{ '/dm' | relative_url | jsonify }},
+  "display": "standalone",
+  "background_color": "#0f1113",
+  "theme_color": "#60a5fa",
+  "orientation": "portrait-primary",
+  "scope": {{ '/' | relative_url | jsonify }},
+  "icons": [
+    {
+      "src": {{ '/apple-touch-icon.png' | relative_url | jsonify }},
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

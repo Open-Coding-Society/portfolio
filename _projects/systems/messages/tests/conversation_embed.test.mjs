@@ -29,6 +29,8 @@ const reply = (status, body) => ({
   ok: status >= 200 && status < 300,
   status,
   text: async () => (body === undefined || body === null ? '' : JSON.stringify(body)),
+  // A shared file's bytes (/files/content): a string body is the file.
+  blob: async () => new Blob([typeof body === 'string' ? body : JSON.stringify(body ?? '')]),
 });
 
 // Spring, as far as the embed talks to it. A route answers { status, body } or { error }.
@@ -245,6 +247,37 @@ test('a member sees the group\'s chat with /dm\'s classes, and new messages as t
   server.publish('/topic/group/7', sentFrame('m2', 'Grace Hopper', 'second message'));
   assert.match(logOf(root).textContent, /second message/);
   chat.destroy();
+});
+
+test('a file previewed in a group chat embed opens inside the embed, under its own title id, and goes with it', async () => {
+  fakeSpring({
+    'GET /api/groups/chat/7/messages': { body: [saved('m1', 'Grace Hopper', '[[files:f~notes.md~4]] the notes')] },
+    'GET /api/groups/chat/7/files/content': { body: '# Hi' },
+  });
+  fakeStomp();
+  const previewIn = async root => {
+    const preview = root.querySelectorAll('button').find(button => button.getAttribute('aria-label') === 'Preview notes.md');
+    preview.dispatchEvent(fakeEvent('click'));
+    for (let i = 0; i < 5; i += 1) await settle();
+    return root.querySelector('.ocs__modal');
+  };
+  const first = newRoot();
+  const second = newRoot();
+  const chats = [
+    await mountGroupChat(first, { groupId: 7, config, richText: stubRichText() }),
+    await mountGroupChat(second, { groupId: 7, config, richText: stubRichText() }),
+  ];
+  await settle();
+  const viewers = [await previewIn(first), await previewIn(second)];
+  viewers.forEach((viewer, i) => {
+    assert.ok(viewer, `embed ${i + 1}'s viewer opens inside it, not on the host page`);
+    assert.equal(viewer.parentNode, [first, second][i].firstChild, 'it sits in the embed\'s .dm frame');
+    const titleId = viewer.getAttribute('aria-labelledby');
+    assert.ok(viewer.querySelector(`[id="${titleId}"]`), 'its label is its own title');
+  });
+  assert.notEqual(viewers[0].getAttribute('aria-labelledby'), viewers[1].getAttribute('aria-labelledby'));
+  chats.forEach(chat => chat.destroy());
+  assert.equal(document.body.querySelectorAll('.ocs__modal').length, 0, 'destroy() takes the viewers away');
 });
 
 test('a heading is shown and names the chat for screen readers', async () => {
@@ -480,4 +513,20 @@ test('two embeds on one page keep to their own conversations, and destroying one
   server.publish('/topic/group/8', sentFrame('b3', 'Alan Turing', 'still here'));
   assert.match(logOf(rootB).textContent, /still here/);
   b.destroy();
+});
+
+test('an embedded chat shows GitHub cards too, and destroy() stops them', async () => {
+  fakeSpring({
+    'GET /api/dm/conversations/5/messages': { body: [{ id: 1, senderUid: 'grace', senderName: 'Grace Hopper', body: 'see https://github.com/Open-Coding-Society/pages/pull/2066', sentAt: '2026-10-20T10:00:00Z' }] },
+    'POST /api/dm/conversations/5/read': { status: 200 },
+  });
+  fakeStomp();
+  const root = newRoot();
+  const chat = await mountConversation(root, { conversationId: '5', config, richText: stubRichText() });
+  await settle();
+
+  const cards = logOf(root).querySelectorAll('.chat-cards');
+  assert.equal(cards.length, 1);
+  assert.equal(cards[0].querySelector('a').href, 'https://github.com/Open-Coding-Society/pages/pull/2066');
+  chat.destroy();
 });

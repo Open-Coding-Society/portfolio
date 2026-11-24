@@ -2,7 +2,6 @@
 layout: post
 title: About
 permalink: /about/
-comments: true
 gallery_images:
   - missionary.jpg
   - john_tamara.jpg
