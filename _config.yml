@@ -52,6 +52,22 @@ plugins:
   - jekyll-remote-theme
   - jekyll-include-cache
 
+# Whether this site runs Spring next to Flask: true for OCS for Education (Flask + Spring),
+# false for OCS for Business (Flask only). assets/js/api/config.js's springEnabled, the
+# Profile page and _includes/head-custom.html read it at build time, so when it is false
+# login, logout, the navbar's DM bell and /profile use Flask alone and the analytics tracker
+# isn't loaded. See _projects/systems/login/README.md.
+spring: false
+
+# How far ahead the calendar ticker on course homes looks (Courses' ocs_calendar_ticker.html):
+# events from today through the school_days_ahead-th school day, or days_ahead days on a site
+# without a school calendar. An event's own Ticker alert on the calendar page ("Alert: N days
+# before" in its description) overrides that, reaching at most alert_limit_days ahead.
+calendar_ticker:
+  school_days_ahead: 5
+  days_ahead: 7
+  alert_limit_days: 30
+
 # Minima-specific settings (applicable to Minima v3 and above only)
 # -----------------------------------------------------------------
 #
